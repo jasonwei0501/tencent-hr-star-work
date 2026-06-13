@@ -76,39 +76,37 @@
             });
         };
 
-        const fetchGeminiResponse = async (userPrompt, systemPrompt, history = []) => {
-            const apiKey = ""; // 预留空字符串，环境自动注入
-            if(!apiKey) {
-                 // 提供一个Mock返回，防止报错
-                 return "API Key 未配置。这是一个模拟的 AI 回复：你的操作我已经收到了，但由于当前未配置 Gemini API Key，我无法进行真正的智能运算。";
-            }
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+       const fetchGeminiResponse = async (userPrompt, systemPrompt, history = []) => {
+    // 1. 请求目标变成了 Vercel 自动生成的内部路由
+    const apiUrl = '/api/gemini';
 
-            const contents = history.map(msg => ({
-                role: msg.sender === 'user' ? 'user' : 'model',
-                parts: [{ text: msg.text || '' }]
-            })).filter(msg => msg.parts[0].text);
+    // 2. 组装对话历史
+    const contents = history.map(msg => ({
+        role: msg.sender === 'user' ? 'user' : 'model',
+        parts: [{ text: msg.text || '' }]
+    })).filter(msg => msg.parts[0].text);
 
-            contents.push({ role: 'user', parts: [{ text: userPrompt }] });
+    contents.push({ role: 'user', parts: [{ text: userPrompt }] });
 
-            const payload = {
-                contents,
-                systemInstruction: { parts: [{ text: systemPrompt }] }
-            };
+    const payload = {
+        contents,
+        systemInstruction: { parts: [{ text: systemPrompt }] }
+    };
 
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const data = await response.json();
-                return data.candidates?.[0]?.content?.parts?.[0]?.text || "抱歉，AI 大脑暂时断线，请重试。";
-            } catch (error) {
-                console.error("Gemini API Request failed:", error);
-                return "系统网络连接异常，请稍后再次发送。";
-            }
-        };
+    try {
+        // 3. 向你的代理接口发请求
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+        return data.candidates?.[0]?.content?.parts?.[0]?.text || "抱歉，AI 大脑暂时断线，请重试。";
+    } catch (error) {
+        console.error("代理 API 请求失败:", error);
+        return "系统网络连接异常，请稍后再次发送。";
+    }
+};
 
         function App() {
             const [currentUser, setCurrentUser] = useState({ type: 'intern', name: '闯关新人', avatar: ROLES[0].avatar });
