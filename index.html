@@ -4,16 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>腾讯 HR 星工作台 - 实战带教系统</title>
-    <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 引入 Babel 实时编译 JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
 <body class="bg-gray-100">
-    <!-- React 应用的挂载点 -->
     <div id="root"></div>
 
-    <!-- 核心业务逻辑 -->
     <script type="text/babel" data-type="module">
         import React, { useState, useEffect, useRef } from 'https://esm.sh/react@18.2.0';
         import { createRoot } from 'https://esm.sh/react-dom@18.2.0/client';
@@ -39,1106 +35,6 @@
 
         const INITIAL_TASKS = [
             { day: 1, title: '环境配置与安全规范', desc: '完成内部 VPN、开发库及数据脱敏工具库的配置。', progress: 100, completed: true, 
-              content: '### SOP 目标与验收标准\n在本模块中，你需要掌握以下核心技能：\n- 严格遵守数据合规红线，绝不在公网暴露真实客户身份。\n- 理解清洗工具的逻辑，保障本地开发环境隔离。\n\n### VPN 与网络配置\n[CODE] // 内部代理配置参数\nexport https_proxy=http://internal-proxy.company.com:8080\nexport no_proxy="localhost,127.0.0.1,.company.com"\n\n[WARN] 严禁在非公司设备上克隆包含真实用户数据的代码仓库！' },
-            { day: 2, title: 'AI 数据清洗 SOP 学习', desc: '学习如何使用正则规则清洗敏感字段，遵守合规红线。', progress: 0, completed: false,
-              content: '### SOP 目标与验收标准\n理解如何剔除训练语料中的 PII (个人身份信息) 数据。\n\n### 脱敏规则引擎配置范例\n[CODE] const MASKING_RULES = [\n  { pattern: /\\b1[3-9]\\d{9}\\b/g, replacement: "PHONE_HIDDEN" },\n  { pattern: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}/g, replacement: "EMAIL_HIDDEN" },\n  { pattern: /\\b\\d{17}[\\dXx]\\b/g, replacement: "ID_CARD_HIDDEN" }\n];\n\n[WARN] 如果遇到上述正则无法覆盖的特殊格式（如海外电话号码或小语种地址），请立即停止处理，并在右侧唤起带教助手进行咨询。' },
-            { day: 3, title: '沙盒环境跑批测试', desc: '在沙盒中使用小样本数据测试清洗模型的准确率。', progress: 0, completed: false, content: '### 任务目标\n在沙盒中跑通一次全量数据脱敏流程，要求检出率达到 99% 以上。' },
-            { day: 4, title: '海外品牌 Tone调 对齐', desc: '学习海外各区域市场的品牌沟通话术指南。', progress: 0, completed: false, content: '### 沟通指南\n了解北美与欧洲市场的品牌表达差异。' },
-            { day: 5, title: '跨时区沟通模拟', desc: '模拟回复一份存在文化差异误解的海外客户邮件。', progress: 0, completed: false, content: '### 模拟实战\n根据上一节课的 Tone 调，完成邮件回复练习。' },
-            { day: 6, title: '异常工单复盘', desc: '复盘历史失败的 AI 交付案例，提取根因。', progress: 0, completed: false, content: '### 5Whys 分析法\n学会使用根因分析工具。' },
-            { day: 7, title: '最终实战答辩', desc: '综合运用脱敏与沟通技巧，完成一次模拟全链路交付。', progress: 0, completed: false, content: '### 终极挑战\n结合 1-6 天的内容，完成最终考核。' }
-        ];
-
-        const PERSONA_CONFIG = {
-            default: { mode: '带教助手', greeting: '嗨！我是你的新人专属带教助手~ 今天工作还顺利吗？', color: 'bg-blue-100 text-blue-700' },
-            '环境配置与安全规范': { mode: 'IT 大牛', greeting: '同学你好，我是你的 IT 支持助手。VPN 或者环境变量配置遇到报错了吗？直接把 Error Log 贴给我看看。', color: 'bg-slate-100 text-slate-700' },
-            'AI 数据清洗 SOP 学习': { mode: '质检审计员', greeting: '警告：数据合规无小事！这里是清洗监督助手，抽样数据遇到无法判断脱敏边界的字段了吗？', color: 'bg-red-100 text-red-700' },
-            '沙盒环境跑批测试': { mode: '测试工程师', greeting: '沙盒跑批助手就位！今天批次跑完没？准确率有达到 95% 吗？', color: 'bg-cyan-100 text-cyan-700' },
-            '海外品牌 Tone调 对齐': { mode: '跨文化公关顾问', greeting: 'Hello! 本地化沟通助手上线。北美客户觉得我们的回复不够 polite？把原邮件发我，我们一起来 Rewrite！', color: 'bg-purple-100 text-purple-700' },
-            '异常工单复盘': { mode: '复盘导师', greeting: '我是你的复盘导师。遇到挫折没关系，但我们要用 5Whys 分析法挖到根因。今天哪个 Case 让你头疼？', color: 'bg-amber-100 text-amber-700' },
-            graduated: { mode: '全栈业务导师', greeting: '🎉 恭喜通关所有前置培训！我是你的实战导师，现在你面临的是真正的业务。有任何数据异常或者客户难搞的点，随时找我！', color: 'bg-orange-100 text-orange-700' }
-        };
-
-        const parseContent = (text) => {
-            if (!text) return <p className="text-gray-500 italic">暂无内容，请联系导师补充。</p>;
-            return text.split('\n').map((line, idx) => {
-                if (line.startsWith('### ')) return <h3 key={idx} className="text-xl font-bold mt-8 mb-4 text-gray-900 border-l-4 border-blue-500 pl-3">{line.replace('### ', '')}</h3>;
-                if (line.startsWith('- ')) return <li key={idx} className="ml-6 mb-2 text-gray-700">{line.replace('- ', '')}</li>;
-                if (line.startsWith('[WARN] ')) return (
-                    <div key={idx} className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-xl my-6 flex gap-3">
-                        <AlertTriangle className="text-yellow-600 shrink-0 mt-0.5" size={20} />
-                        <p className="text-yellow-800 text-sm font-medium m-0">{line.replace('[WARN] ', '')}</p>
-                    </div>
-                );
-                if (line.startsWith('[CODE] ')) return (
-                    <div key={idx} className="bg-gray-800 rounded-xl p-5 my-6 font-mono text-[13px] overflow-x-auto text-green-400 whitespace-pre-wrap shadow-inner leading-relaxed">
-                        {line.replace('[CODE] ', '').replace(/\\n/g, '\n')}
-                    </div>
-                );
-                if (line.trim() === '') return <div key={idx} className="h-2"></div>;
-                return <p key={idx} className="mb-3 text-gray-700 leading-relaxed">{line}</p>;
-            });
-        };
-
-        const fetchGeminiResponse = async (userPrompt, systemPrompt, history = []) => {
-            const apiKey = ""; // 预留空字符串，环境自动注入
-            if(!apiKey) {
-                 // 提供一个Mock返回，防止报错
-                 return "API Key 未配置。这是一个模拟的 AI 回复：你的操作我已经收到了，但由于当前未配置 Gemini API Key，我无法进行真正的智能运算。";
-            }
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
-
-            const contents = history.map(msg => ({
-                role: msg.sender === 'user' ? 'user' : 'model',
-                parts: [{ text: msg.text || '' }]
-            })).filter(msg => msg.parts[0].text);
-
-            contents.push({ role: 'user', parts: [{ text: userPrompt }] });
-
-            const payload = {
-                contents,
-                systemInstruction: { parts: [{ text: systemPrompt }] }
-            };
-
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const data = await response.json();
-                return data.candidates?.[0]?.content?.parts?.[0]?.text || "抱歉，AI 大脑暂时断线，请重试。";
-            } catch (error) {
-                console.error("Gemini API Request failed:", error);
-                return "系统网络连接异常，请稍后再次发送。";
-            }
-        };
-
-        function App() {
-            const [currentUser, setCurrentUser] = useState({ type: 'intern', name: '闯关新人', avatar: ROLES[0].avatar });
-            const [showRoleMenu, setShowRoleMenu] = useState(false);
-            const [activeNav, setActiveNav] = useState('guide'); 
-            
-            const [tasks, setTasks] = useState(INITIAL_TASKS);
-            const [selectedTaskIndex, setSelectedTaskIndex] = useState(null);
-            const [isFullyCleared, setIsFullyCleared] = useState(false);
-            
-            const [messages, setMessages] = useState([]);
-            const [inputMessage, setInputMessage] = useState('');
-            const [isSidebarChatOpen, setIsSidebarChatOpen] = useState(false);
-            const [isAiTyping, setIsAiTyping] = useState(false);
-            
-            const [currentPersona, setCurrentPersona] = useState(PERSONA_CONFIG.default);
-            const [escalationTickets, setEscalationTickets] = useState([]);
-
-            const [editingIndex, setEditingIndex] = useState(null);
-            const [editForm, setEditForm] = useState({ title: '', desc: '', content: '' });
-            
-            const [copilotMessages, setCopilotMessages] = useState([
-                { sender: 'ai', text: '你好，我是你的 SOP 编排 Copilot。你需要为你名下的实习生修改哪部分指南？我可以帮你润色话术、生成脱敏规则示例，或者梳理业务流程。' }
-            ]);
-            const [copilotInput, setCopilotInput] = useState('');
-            const [isCopilotTyping, setIsCopilotTyping] = useState(false);
-            const copilotMessagesEndRef = useRef(null);
-
-            const [loungeChannel, setLoungeChannel] = useState('public'); 
-            const [groupMessages, setGroupMessages] = useState([
-                { id: 1, sender: { name: '带教导师 (MT)', type: 'mt', avatar: ROLES[1].avatar }, text: '欢迎大家来到能量公共场！不论你是哪个业务组的新人，遇到跨部门流程问题都可以随时在这里交流。', time: '09:00' },
-                { id: 2, sender: { name: '群聊管家', type: 'system_ai', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=Energy' }, text: '滴滴！我是能量场的 AI 助理，我会在这里陪大家闲聊、解答通用问题。如果想要我回答，可以在句子里带上“AI”或者“管家”哦~', time: '09:01' }
-            ]);
-            const [mtPrivateMessages, setMtPrivateMessages] = useState([
-                { id: 1, sender: { name: '带教导师 (MT)', type: 'mt', avatar: ROLES[1].avatar }, text: '最近手头上的数据清洗任务卡住了吗？业务上如果有不确定的合规边界，直接在这里私聊发我看看。', time: '09:10' }
-            ]);
-            const [hrPrivateMessages, setHrPrivateMessages] = useState([
-                { id: 1, sender: { name: 'HRBP', type: 'hr', avatar: ROLES[2].avatar }, text: '哈喽！我是你的专属 HRBP。这里是我们的 1V1 谈心室，聊天记录为你绝对保密。近期工作节奏还能适应吗？', time: '09:15' }
-            ]);
-            const [groupInput, setGroupInput] = useState('');
-            const [isLoungeTyping, setIsLoungeTyping] = useState(false);
-            const groupMessagesEndRef = useRef(null);
-
-            const messagesEndRef = useRef(null);
-            const sidebarMessagesEndRef = useRef(null);
-
-            useEffect(() => {
-                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-                sidebarMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-                copilotMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-                groupMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-            }, [messages, isSidebarChatOpen, copilotMessages, groupMessages, mtPrivateMessages, hrPrivateMessages, loungeChannel, isAiTyping, isCopilotTyping, isLoungeTyping]);
-
-            useEffect(() => {
-                const allCompleted = tasks.every(t => t.completed);
-                setIsFullyCleared(allCompleted);
-                if (allCompleted && currentUser.type === 'intern') {
-                    setCurrentPersona(PERSONA_CONFIG.graduated);
-                }
-            }, [tasks, currentUser.type]);
-
-            const handleRoleSwitch = (role) => {
-                setCurrentUser({ type: role.id, name: role.name, avatar: role.avatar });
-                setShowRoleMenu(false);
-                setEditingIndex(null); 
-                setLoungeChannel('public'); 
-                if (role.id === 'intern') setActiveNav('guide');
-                else if (role.id === 'mt') setActiveNav('mt_dashboard');
-                else if (role.id === 'hr') setActiveNav('hr_dashboard');
-            };
-
-            const handleTaskClick = (index) => {
-                setSelectedTaskIndex(index);
-                const taskTitle = tasks[index].title;
-                const newPersona = PERSONA_CONFIG[taskTitle] || PERSONA_CONFIG.default;
-                setCurrentPersona(newPersona);
-                setMessages([{ sender: 'ai', text: newPersona.greeting, type: 'greeting' }]);
-                if (!isSidebarChatOpen) setIsSidebarChatOpen(true);
-            };
-
-            const toggleTaskCompletion = (index, e) => {
-                e.stopPropagation();
-                const newTasks = [...tasks];
-                newTasks[index].completed = !newTasks[index].completed;
-                newTasks[index].progress = newTasks[index].completed ? 100 : 0;
-                setTasks(newTasks);
-            };
-
-            const completeAllTasks = () => setTasks(tasks.map(t => ({ ...t, completed: true, progress: 100 })));
-
-            const handleSendMessage = async () => {
-                if (!inputMessage.trim() || isAiTyping) return;
-                
-                const userMsg = { sender: 'user', text: inputMessage, type: 'text' };
-                setMessages(prev => [...prev, userMsg]);
-                const currentInput = inputMessage;
-                setInputMessage('');
-                setIsAiTyping(true);
-
-                const systemPrompt = `
-                    你是一位兼具“高阶业务能力”与“高情绪价值”的资深业务带教导师助手。
-                    你当前的人设是：${currentPersona.mode}。当前的培训主题是：${selectedTaskIndex !== null ? tasks[selectedTaskIndex].title : '实战打怪阶段'}。
-                    你的职责是主动关心实习生，解答业务卡点，并提供专业建议。语气要亲切、鼓励，符合你的人设。
-                    【强制输出要求】
-                    在你的正常回复结束后，你 **必须** 另起一行，输出一个严格的 JSON 代码块，用于后端提取状态。
-                    \`\`\`json\n{"姓名":"实习生","核心跟进任务":"当前模块","当前健康度":"🟢顺利","具体卡点摘要":"无","导师介入建议":"无需介入"}\n\`\`\`
-                `;
-
-                const historyForAPI = messages.filter(m => m.type === 'text' || m.type === 'greeting');
-                const responseText = await fetchGeminiResponse(currentInput, systemPrompt, historyForAPI);
-
-                const jsonMatch = responseText.match(/```json\n([\s\S]*?)\n
-```/);
-                let mainText = responseText;
-                let statusJson = null;
-
-                if (jsonMatch) {
-                    mainText = responseText.replace(jsonMatch[0], '').trim();
-                    try { statusJson = JSON.parse(jsonMatch[1]); } catch (e) { console.error("JSON parse error", e); }
-                }
-
-                setMessages(prev => [...prev, { sender: 'ai', text: mainText, type: 'text' }]);
-                if (statusJson) {
-                    setMessages(prev => [...prev, { sender: 'ai', text: JSON.stringify(statusJson, null, 2), type: 'json' }]);
-                }
-                setIsAiTyping(false);
-            };
-
-            const handleCopilotSend = async () => {
-                if (!copilotInput.trim() || isCopilotTyping) return;
-                const userMsg = { sender: 'user', text: copilotInput };
-                setCopilotMessages(prev => [...prev, userMsg]);
-                const currentInput = copilotInput;
-                setCopilotInput('');
-                setIsCopilotTyping(true);
-
-                const systemPrompt = `你是一位资深的 SOP编排助手。如果生成代码用 [CODE]，警告用 [WARN]。使用Markdown语法。`;
-                const responseText = await fetchGeminiResponse(currentInput, systemPrompt, copilotMessages);
-                setCopilotMessages(prev => [...prev, { sender: 'ai', text: responseText }]);
-                setIsCopilotTyping(false);
-            };
-
-            const handleEscalate = () => {
-                const recentContext = messages.filter(m => m.type === 'text' || m.type === 'user').slice(-4).map(m => `${m.sender === 'user' ? '实习生' : 'AI'}: ${m.text}`).join('\n');
-                const ticketId = Math.random().toString(36).substring(2, 9).toUpperCase();
-                
-                const newTicket = { id: ticketId, time: new Date().toLocaleTimeString(), context: recentContext || '用户直接发起了求助，暂无过多前序对话。', status: 'pending' };
-                setEscalationTickets(prev => [newTicket, ...prev]);
-                
-                setMessages(prev => [...prev, { 
-                    sender: 'system', 
-                    text: `🚨 已为您一键呼叫导师介入，工单号 #${ticketId} 已推送到 MT 看板。导师会根据上下文来找你，请耐心等待或继续提问。`, 
-                    type: 'system' 
-                }]);
-            };
-
-            const handleLoungeSendMessage = async () => {
-                if (!groupInput.trim() || isLoungeTyping) return;
-                const newMsg = { id: Date.now(), sender: currentUser, text: groupInput, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) };
-                const currentText = groupInput;
-                setGroupInput('');
-
-                if (loungeChannel === 'public') {
-                    setGroupMessages(prev => [...prev, newMsg]);
-                    if (currentText.toLowerCase().includes('ai') || currentText.includes('问题') || currentText.includes('管家')) {
-                        setIsLoungeTyping(true);
-                        const systemPrompt = "你是群聊中的『AI 群管家』。友善、极简回复不超过50字。";
-                        const responseText = await fetchGeminiResponse(currentText, systemPrompt, groupMessages.slice(-5));
-                        setGroupMessages(prev => [...prev, { id: Date.now() + 1, sender: { name: '群聊管家', type: 'system_ai', avatar: 'https://api.dicebear.com/7.x/bottts/svg?seed=Energy' }, text: responseText, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) }]);
-                        setIsLoungeTyping(false);
-                    }
-                } else if (loungeChannel === 'mt' || loungeChannel === 'hr') {
-                    const setMessagesState = loungeChannel === 'mt' ? setMtPrivateMessages : setHrPrivateMessages;
-                    const chatHistory = loungeChannel === 'mt' ? mtPrivateMessages : hrPrivateMessages;
-                    
-                    setMessagesState(prev => [...prev, newMsg]);
-
-                    if (currentUser.type === 'intern') {
-                        setIsLoungeTyping(true);
-                        const targetRole = loungeChannel === 'mt' ? '导师(MT)' : 'HRBP';
-                        const systemPrompt = `你是一个高级组织诊断器。发送一条60字以内的私密旁白（Whisper）给管理者，分析情绪。`;
-                        const whisperText = await fetchGeminiResponse(currentText, systemPrompt, chatHistory.slice(-4));
-                        
-                        setMessagesState(prev => [...prev, { id: Date.now() + 2, type: 'ai_whisper', text: whisperText, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) }]);
-                        setIsLoungeTyping(false);
-                    }
-                }
-            };
-
-            const renderGroupChat = () => {
-                const currentMessages = loungeChannel === 'public' ? groupMessages : loungeChannel === 'mt' ? mtPrivateMessages : hrPrivateMessages;
-                let channelTitle = '公共能量场 (Public)';
-                if (loungeChannel === 'mt') channelTitle = currentUser.type === 'intern' ? '1V1 带教导师沟通' : '1V1 辅导：闯关新人';
-                if (loungeChannel === 'hr') channelTitle = currentUser.type === 'intern' ? '1V1 HRBP 谈心室' : '1V1 访谈：闯关新人';
-                const channelIcon = loungeChannel === 'public' ? <Hash size="{20}"/> : <Lock size="{20}"/>;
-
-                return (
-                <div className="flex-1 bg-white flex h-full overflow-hidden">
-                    <div className="w-64 bg-gray-50 border-r border-gray-200 flex flex-col shrink-0">
-                        <div className="px-5 py-5 border-b border-gray-200 bg-white"><h2 className="text-lg font-bold text-gray-900">通讯录</h2></div>
-                        <div className="p-3 flex-1 overflow-y-auto space-y-1">
-                            <div className="text-xs font-bold text-gray-400 mb-2 mt-2 px-2 uppercase tracking-wider">讨论大厅</div>
-                            <button onClick={() => setLoungeChannel('public')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${loungeChannel === 'public' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600 hover:bg-gray-100'}`}><Hash size="{18}" className="{loungeChannel" 'public' ? 'text-indigo-600' : 'text-gray-400'}/> 公共能量场</button>
-                            <div className="text-xs font-bold text-gray-400 mb-2 mt-6 px-2 uppercase tracking-wider">私密沟通 (1V1)</div>
-                            {currentUser.type === 'intern' && (
-                                <>
-                                    <button onClick={() => setLoungeChannel('mt')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${loungeChannel === 'mt' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600 hover:bg-gray-100'}`}><div className="relative"><img src={ROLES[1].avatar} alt="MT" className="w-6 h-6 rounded-full bg-indigo-50 border border-indigo-200" /><span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border border-white rounded-full"></span></div>带教导师 (MT)</button>
-                                    <button onClick={() => setLoungeChannel('hr')} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${loungeChannel === 'hr' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600 hover:bg-gray-100'}`}><div className="relative"><img src={ROLES[2].avatar} alt="HR" className="w-6 h-6 rounded-full bg-orange-50 border border-orange-200" /><span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border border-white rounded-full"></span></div>HRBP 姐姐</button>
-                                </>
-                            )}
-                            {(currentUser.type === 'mt' || currentUser.type === 'hr') && (
-                                    <button onClick={() => setLoungeChannel(currentUser.type)} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${loungeChannel === currentUser.type ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600 hover:bg-gray-100'}`}><div className="relative"><img src={ROLES[0].avatar} alt="Intern" className="w-6 h-6 rounded-full bg-blue-50 border border-blue-200" /><span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-yellow-500 border border-white rounded-full"></span></div>闯关新人</button>
-                            )}
-                        </div>
-                    </div>
-
-                    <div className="flex-1 flex flex-col relative bg-gray-50/50">
-                    <div className="bg-white border-b border-gray-200 px-8 py-5 flex justify-between items-center z-10 shrink-0 shadow-sm">
-                        <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-sm ${loungeChannel === 'public' ? 'bg-gradient-to-tr from-indigo-500 to-purple-500' : 'bg-gray-800'}`}>{channelIcon}</div>
-                        <div>
-                            <h2 className="text-lg font-bold text-gray-900">{channelTitle}</h2>
-                            <p className="text-xs text-gray-500 flex items-center gap-1">{loungeChannel === 'public' ? 'MT、HRBP、实习生与 AI 在线' : '端到端加密沟通，保护隐私'}</p>
-                        </div>
-                        </div>
-                    </div>
-
-                    <div className="flex-1 overflow-y-auto p-8 scroll-smooth">
-                        <div className="max-w-4xl mx-auto space-y-6">
-                            {currentMessages.map((msg) => {
-                                if (msg.type === 'ai_whisper') {
-                                    if (currentUser.type === 'intern') return null;
-                                    return (
-                                        <div key={msg.id} className="flex justify-center my-6">
-                                            <div className="bg-indigo-50/80 backdrop-blur border border-indigo-200 px-5 py-3 rounded-2xl flex items-start gap-3 max-w-lg shadow-sm">
-                                                <Brain size="{18}" className="text-indigo-600 shrink-0 mt-0.5"/>
-                                                <div>
-                                                    <div className="flex items-center justify-between mb-1"><span className="text-xs font-bold text-indigo-800">AI 情绪捕获雷达</span><span className="text-[10px] text-indigo-400">{msg.time}</span></div>
-                                                    <span className="text-[13px] text-indigo-900 leading-relaxed block">{msg.text}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    );
-                                }
-
-                                const isMe = msg.sender.name === currentUser.name;
-                                return (
-                                    <div key={msg.id} className={`flex items-start gap-4 ${isMe ? 'flex-row-reverse' : ''}`}>
-                                    <img src={msg.sender.avatar} alt="avatar" className="w-10 h-10 rounded-full bg-white border border-gray-200 shadow-sm shrink-0" />
-                                    <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} max-w-[75%]`}>
-                                        <div className={`flex items-center gap-2 mb-1.5 ${isMe ? 'flex-row-reverse' : ''}`}>
-                                            <span className="text-sm font-bold text-gray-700">{msg.sender.name}</span>
-                                            <span className="text-xs text-gray-400">{msg.time}</span>
-                                        </div>
-                                        <div className={`px-5 py-3 rounded-2xl text-[14px] leading-relaxed shadow-sm ${
-                                            isMe ? 'bg-indigo-600 text-white rounded-tr-sm' 
-                                                : msg.sender.type === 'system_ai' ? 'bg-orange-50 border border-orange-100 text-orange-900 rounded-tl-sm'
-                                                : 'bg-white border border-gray-200 text-gray-800 rounded-tl-sm'
-                                        }`}>
-                                            {msg.text}
-                                        </div>
-                                    </div>
-                                    </div>
-                                );
-                            })}
-                            {isLoungeTyping && (<div className="flex items-center gap-3 text-gray-400 p-2"><Loader2 size="{16}" className="animate-spin"/><span className="text-xs">AI 正在思考...</span></div>)}
-                            <div ref={groupMessagesEndRef} />
-                        </div>
-                    </div>
-
-                    <div className="bg-white p-5 shrink-0 border-t border-gray-200">
-                        <div className="max-w-4xl mx-auto relative flex items-center">
-                        <input type="text" value={groupInput} onChange={(e) => setGroupInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleLoungeSendMessage()} placeholder={loungeChannel === 'public' ? "在公共能量场发言..." : "发送私密消息..."} disabled={isLoungeTyping} className="w-full bg-gray-100 border-transparent rounded-xl pl-6 pr-16 py-4 focus:outline-none focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-[15px] disabled:opacity-50" />
-                        <button onClick={handleLoungeSendMessage} disabled={isLoungeTyping} className="absolute right-2 p-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors shadow-sm disabled:opacity-50"><Send size="{20}" className="ml-0.5"/></button>
-                        </div>
-                    </div>
-                    </div>
-                </div>
-                );
-            };
-
-            const renderGuideList = () => (
-                <div className="flex-1 overflow-y-auto bg-gray-50/50 flex flex-col items-center py-10 relative">
-                <div className="max-w-4xl w-full px-8">
-                    <div className="mb-10 text-center">
-                    <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">星际远航：7天破冰挑战</h2>
-                    <p className="mt-2 text-gray-500">完成所有基础训练舱任务，解锁正式实战工作台</p>
-                    </div>
-
-                    <div className="relative">
-                    <div className="absolute left-[39px] top-4 bottom-4 w-0.5 bg-gray-200"></div>
-                    
-                    <div className="space-y-6 relative">
-                        {tasks.map((task, index) => {
-                        const isCurrent = !task.completed && (index === 0 || tasks[index-1].completed);
-                        
-                        return (
-                            <div key={index} onClick={() => handleTaskClick(index)} className={`relative flex items-center gap-6 p-5 rounded-2xl border-2 transition-all cursor-pointer bg-white group ${task.completed ? 'border-gray-200 hover:border-gray-300' : isCurrent ? 'border-blue-500 shadow-md shadow-blue-100 hover:-translate-y-1' : 'border-transparent opacity-60 hover:opacity-100'}`}>
-                            <div className="relative z-10 shrink-0">
-                                {task.completed ? (
-                                <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-500 flex items-center justify-center border-2 border-emerald-500 hover:bg-emerald-200" onClick={(e) => toggleTaskCompletion(index, e)}><CheckCircle2 size="{24}"/></div>
-                                ) : isCurrent ? (
-                                <div className="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center shadow-lg shadow-blue-500/30 animate-pulse hover:bg-blue-600" onClick={(e) => toggleTaskCompletion(index, e)}><PlayCircle size="{24}" className="ml-0.5"/></div>
-                                ) : (
-                                <div className="w-10 h-10 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center border-2 border-gray-200 hover:bg-gray-200" onClick={(e) => toggleTaskCompletion(index, e)}><Circle size="{24}"/></div>
-                                )}
-                            </div>
-
-                            <div className="flex-1">
-                                <div className="flex items-center gap-3 mb-1">
-                                <span className={`text-xs font-bold px-2 py-0.5 rounded-md ${task.completed ? 'bg-gray-100 text-gray-500' : isCurrent ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-400'}`}>DAY {task.day}</span>
-                                <h3 className={`font-bold text-lg ${task.completed ? 'text-gray-500 line-through' : 'text-gray-900'}`}>{task.title}</h3>
-                                </div>
-                                <p className={`text-sm ${task.completed ? 'text-gray-400' : 'text-gray-500'}`}>{task.desc}</p>
-                            </div>
-
-                            <div className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"><ChevronRight className="text-gray-400" size="{24}"/></div>
-                            </div>
-                        );
-                        })}
-                    </div>
-                    </div>
-
-                    {!isFullyCleared && (
-                        <div className="mt-12 text-center">
-                        <button onClick={completeAllTasks} className="text-sm font-medium text-gray-400 hover:text-blue-600 underline underline-offset-4 transition-colors">
-                            🚀 [演示专用] 一键完成所有任务
-                        </button>
-                        </div>
-                    )}
-                </div>
-
-                {isFullyCleared && (
-                    <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-white via-white to-transparent pt-20 pb-10 flex justify-center z-10">
-                    <div className="bg-gray-900 text-white px-8 py-5 rounded-2xl shadow-2xl flex items-center gap-6 animate-bounce">
-                        <Trophy className="text-yellow-400" size="{32}"/>
-                        <div>
-                        <h3 className="font-bold text-lg">全套指南通关完毕！</h3>
-                        <p className="text-gray-400 text-sm">你已具备独立承接业务的能力</p>
-                        </div>
-                        <button onClick={() => {setActiveNav('chat'); setMessages([{ sender: 'ai', text: PERSONA_CONFIG.graduated.greeting, type: 'greeting' }]);}} className="ml-4 bg-blue-500 hover:bg-blue-600 px-6 py-2.5 rounded-xl font-medium transition-colors shadow-lg shadow-blue-500/30">
-                        进入实战大厅
-                        </button>
-                    </div>
-                    </div>
-                )}
-                </div>
-            );
-
-            const renderTaskDetail = () => {
-                const task = tasks[selectedTaskIndex];
-                return (
-                <div className="flex-1 bg-white overflow-y-auto flex flex-col relative">
-                    <div className="sticky top-0 bg-white/80 backdrop-blur-md border-b border-gray-100 px-8 py-4 flex items-center gap-4 z-10 shadow-sm">
-                        <button onClick={() => setSelectedTaskIndex(null)} className="p-2 hover:bg-gray-100 rounded-full transition-colors"><ArrowLeft size="{20}" className="text-gray-600"/></button>
-                        <div>
-                        <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md mb-1 inline-block">Day {task.day}</span>
-                        <h2 className="text-xl font-bold text-gray-900">{task.title}</h2>
-                        </div>
-                    </div>
-
-                    <div className="p-10 max-w-3xl mx-auto w-full pb-32">
-                    {parseContent(task.content)}
-                    
-                    <div className="mt-16 pt-8 border-t border-gray-100 flex justify-center">
-                        <button 
-                            onClick={(e) => {toggleTaskCompletion(selectedTaskIndex, e); setSelectedTaskIndex(null);}}
-                            className={`flex items-center gap-2 px-8 py-3 rounded-full font-bold text-lg transition-all ${task.completed ? 'bg-emerald-100 text-emerald-600 border border-emerald-200' : 'bg-blue-600 text-white hover:bg-blue-700 shadow-xl shadow-blue-200'}`}
-                        >
-                        <CheckCircle size="{22}"/> {task.completed ? '已掌握此 SOP' : '标记为已掌握'}
-                        </button>
-                    </div>
-                    </div>
-                </div>
-                );
-            };
-
-            const renderMessageList = () => (
-                <>
-                {messages.map((msg, idx) => (
-                    <div key={idx} className={`flex flex-col mb-4 ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
-                    <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-[14px] leading-relaxed relative group ${
-                        msg.sender === 'user' ? 'bg-blue-500 text-white rounded-br-sm' : 
-                        msg.type === 'greeting' ? `${currentPersona.color} rounded-bl-sm font-medium border border-black/5` : 
-                        msg.type === 'system' ? 'bg-red-50 text-red-600 border border-red-200 rounded-bl-sm text-xs font-medium w-full' : 
-                        msg.type === 'json' ? 'bg-gray-800 text-green-400 font-mono text-xs p-4 rounded-xl w-full overflow-x-auto shadow-inner' : 
-                        'bg-white border border-gray-100 shadow-sm text-gray-800 rounded-bl-sm'
-                    }`}>
-                        {msg.type === 'json' ? <pre><code>{msg.text}</code></pre> : <div className="whitespace-pre-wrap">{msg.text}</div>}
-                    </div>
-                    </div>
-                ))}
-                {isAiTyping && (
-                    <div className="flex flex-col mb-4 items-start">
-                        <div className="bg-white border border-gray-100 shadow-sm text-gray-400 rounded-2xl rounded-bl-sm px-4 py-3 text-sm flex items-center gap-2">
-                            <Loader2 size="{16}" className="animate-spin text-blue-500"/> AI 正在组织语言...
-                        </div>
-                    </div>
-                )}
-                </>
-            );
-
-            const renderFullScreenChat = () => (
-                <div className="flex-1 bg-gray-50 flex flex-col h-full relative">
-                <div className="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center z-10 shrink-0">
-                    <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-orange-400 to-pink-500 flex items-center justify-center text-white shadow-md"><Bot size="{20}"/></div>
-                    <div>
-                        <h2 className="font-bold text-gray-900">实战业务支持大厅</h2>
-                        <p className="text-xs text-gray-500 flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> {currentPersona.mode} 在线护航</p>
-                    </div>
-                    </div>
-                    <button onClick={handleEscalate} className="bg-red-50 text-red-600 hover:bg-red-100 px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors border border-red-100">
-                        <LifeBuoy size="{16}"/> 紧急求助导师
-                    </button>
-                </div>
-
-                <div className="flex-1 overflow-y-auto p-6 scroll-smooth">
-                    <div className="max-w-4xl mx-auto w-full">
-                        {messages.length === 0 && (
-                        <div className="text-center py-20 text-gray-400 flex flex-col items-center">
-                            <Bot size="{48}" className="mb-4 opacity-20"/>
-                            <p>毕业快乐！这里是你的专属工作台，随时可以抛砖或提问。</p>
-                        </div>
-                        )}
-                        {renderMessageList()}
-                        <div ref={messagesEndRef} />
-                    </div>
-                </div>
-
-                <div className="bg-white p-4 shrink-0 border-t border-gray-100">
-                    <div className="max-w-4xl mx-auto w-full relative flex items-center">
-                    <input type="text" value={inputMessage} onChange={(e) => setInputMessage(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()} placeholder="遇到卡点？扔错误日志或者直接问我..." disabled={isAiTyping} className="w-full bg-gray-50 border border-gray-200 rounded-full pl-6 pr-14 py-4 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-[15px] disabled:opacity-50" />
-                    <button onClick={handleSendMessage} disabled={isAiTyping} className="absolute right-2 p-2.5 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors shadow-sm disabled:opacity-50">
-                        <Send size="{18}" className="ml-0.5"/>
-                    </button>
-                    </div>
-                </div>
-                </div>
-            );
-
-            const renderSidebarChat = () => (
-                <div className={`fixed right-0 top-0 bottom-0 w-[400px] bg-gray-50 border-l border-gray-200 shadow-2xl flex flex-col transition-transform duration-300 z-40 ${isSidebarChatOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-                <div className="bg-white px-5 py-4 flex items-center justify-between border-b border-gray-200 shrink-0 shadow-sm">
-                    <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-xl ${currentPersona.color.split(' ')[0]} ${currentPersona.color.split(' ')[1]}`}><Bot size="{20}"/></div>
-                    <div>
-                        <h3 className="font-bold text-gray-900 flex items-center gap-2">带教助手</h3>
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium mt-0.5 inline-block ${currentPersona.color}`}>{currentPersona.mode}</span>
-                    </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <button onClick={handleEscalate} title="求助导师" className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"><LifeBuoy size="{18}"/></button>
-                        <button onClick={() => setIsSidebarChatOpen(false)} className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"><PanelRightClose size="{20}"/></button>
-                    </div>
-                </div>
-                
-                <div className="flex-1 overflow-y-auto p-4 scroll-smooth">
-                    {renderMessageList()}
-                    <div ref={sidebarMessagesEndRef} />
-                </div>
-
-                <div className="p-4 bg-white border-t border-gray-200 shrink-0">
-                    <div className="relative">
-                    <input type="text" value={inputMessage} onChange={(e) => setInputMessage(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()} placeholder="随时问我..." disabled={isAiTyping} className="w-full bg-gray-100 border-transparent rounded-xl pl-4 pr-12 py-3 text-sm focus:outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all disabled:opacity-50" />
-                    <button onClick={handleSendMessage} disabled={isAiTyping} className="absolute right-1.5 top-1.5 p-1.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50">
-                        <Send size="{18}"/>
-                    </button>
-                    </div>
-                </div>
-                </div>
-            );
-
-            const renderEditGuide = () => {
-                if (editingIndex === null) {
-                return (
-                    <div className="flex-1 bg-gray-50 overflow-y-auto">
-                        <div className="border-b border-gray-200 bg-white px-10 py-8 flex items-center justify-between sticky top-0 z-10 shadow-sm">
-                            <div className="flex items-center gap-4">
-                                <div className="p-3 bg-indigo-600 text-white rounded-xl shadow-lg shadow-indigo-600/20"><Settings size="{28}"/></div>
-                                <div>
-                                    <h1 className="text-2xl font-bold text-gray-900">SOP 任务编排中心</h1>
-                                    <p className="text-gray-500">管理新人的通关任务，修改的内容将实时动态渲染到实习生指南中</p>
-                                </div>
-                            </div>
-                            <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-medium flex items-center gap-2 transition-colors shadow-sm">
-                                <Plus size="{18}"/> 新增学习模块
-                            </button>
-                        </div>
-                        
-                        <div className="p-10 max-w-5xl mx-auto space-y-4">
-                            <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-5 mb-8 flex items-start gap-3">
-                                <AlertCircle className="text-indigo-500 shrink-0 mt-0.5" size="{20}"/>
-                                <p className="text-sm text-indigo-800 leading-relaxed">
-                                    导师请注意：在此处修改的 SOP 任务细节、验证规则及考核标准，不仅会影响前端页面展示，还会作为 AI 带教助手的底层 Context，影响其辅导新人的准度。
-                                </p>
-                            </div>
-
-                            {tasks.map((task, index) => (
-                                <div key={index} className="bg-white border border-gray-200 rounded-xl p-5 flex items-center justify-between shadow-sm hover:shadow-md hover:border-indigo-300 transition-all group">
-                                    <div className="flex items-center gap-5">
-                                        <div className="bg-gray-100 text-gray-500 font-extrabold w-12 h-12 flex items-center justify-center rounded-xl border border-gray-200 group-hover:bg-indigo-100 group-hover:text-indigo-600 group-hover:border-indigo-200 transition-colors">D{task.day}</div>
-                                        <div>
-                                            <h3 className="font-bold text-gray-900 text-lg mb-1">{task.title}</h3>
-                                            <p className="text-sm text-gray-500">{task.desc}</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button onClick={() => { setEditingIndex(index); setEditForm({ title: task.title, desc: task.desc, content: task.content || '' }); }} className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors flex items-center gap-1 text-sm font-medium">
-                                            <Edit size="{16}"/> 编辑 SOP 详情
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                );
-                }
-
-                return (
-                <div className="flex-1 bg-white flex flex-col h-full overflow-hidden">
-                    <div className="border-b border-gray-200 bg-white px-6 py-4 flex items-center justify-between shrink-0 shadow-sm z-10">
-                        <div className="flex items-center gap-4">
-                            <button onClick={() => setEditingIndex(null)} className="p-2 hover:bg-gray-100 rounded-full transition-colors"><X size="{20}" className="text-gray-600"/></button>
-                            <div className="font-bold text-gray-900 text-lg flex items-center gap-2"><Edit size="{18}" className="text-indigo-600"/> 正在编辑：Day {tasks[editingIndex].day} 指南</div>
-                        </div>
-                        <button onClick={() => { const newTasks = [...tasks]; newTasks[editingIndex] = { ...newTasks[editingIndex], ...editForm }; setTasks(newTasks); setEditingIndex(null); }} className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors shadow-sm">
-                            <Save size="{18}"/> 保存并实时发布
-                        </button>
-                    </div>
-
-                    <div className="flex-1 flex overflow-hidden">
-                        <div className="w-1/2 p-8 overflow-y-auto border-r border-gray-200 bg-gray-50/30">
-                            <div className="max-w-xl mx-auto space-y-6">
-                                <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-2">任务标题</label>
-                                    <input type="text" value={editForm.title} onChange={(e) => setEditForm({...editForm, title: e.target.value})} className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"/>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-2">简短描述</label>
-                                    <input type="text" value={editForm.desc} onChange={(e) => setEditForm({...editForm, desc: e.target.value})} className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"/>
-                                </div>
-                                <div>
-                                    <div className="flex justify-between items-end mb-2">
-                                        <label className="block text-sm font-bold text-gray-700">SOP 详情内容 (支持伪富文本解析)</label>
-                                        <span className="text-xs text-gray-400">使用 ### 标题, - 列表, [WARN] 警告, [CODE] 代码段</span>
-                                    </div>
-                                    <textarea value={editForm.content} onChange={(e) => setEditForm({...editForm, content: e.target.value})} rows={18} className="w-full border border-gray-300 rounded-lg p-4 font-mono text-[13px] text-gray-800 leading-relaxed focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"/>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="w-1/2 flex flex-col bg-indigo-50/30 relative">
-                            <div className="px-6 py-4 flex items-center gap-2 border-b border-indigo-100 bg-white/50 backdrop-blur-sm shrink-0">
-                                <Sparkles className="text-indigo-500" size="{20}"/>
-                                <h3 className="font-bold text-indigo-900">SOP 编排助手 (AI Copilot)</h3>
-                            </div>
-                            
-                            <div className="flex-1 overflow-y-auto p-6 scroll-smooth">
-                                {copilotMessages.map((msg, idx) => (
-                                    <div key={idx} className={`flex flex-col mb-4 ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
-                                        <div className={`max-w-[85%] rounded-2xl px-5 py-3 text-[14px] leading-relaxed shadow-sm ${msg.sender === 'user' ? 'bg-indigo-600 text-white rounded-br-sm' : 'bg-white border border-indigo-100 text-gray-800 rounded-bl-sm'}`}>
-                                            <div className="whitespace-pre-wrap">{msg.text}</div>
-                                        </div>
-                                    </div>
-                                ))}
-                                {isCopilotTyping && (
-                                    <div className="flex flex-col mb-4 items-start">
-                                        <div className="bg-white border border-indigo-100 shadow-sm text-indigo-400 rounded-2xl rounded-bl-sm px-4 py-3 text-sm flex items-center gap-2">
-                                            <Loader2 size="{16}" className="animate-spin text-indigo-500"/> Copilot 正在生成...
-                                        </div>
-                                    </div>
-                                )}
-                                <div ref={copilotMessagesEndRef} />
-                            </div>
-
-                            <div className="p-4 bg-white border-t border-indigo-100 shrink-0">
-                                <div className="relative flex items-center">
-                                    <input type="text" value={copilotInput} onChange={(e) => setCopilotInput(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleCopilotSend()} placeholder="让 AI 帮你想脱敏规则、撰写提示警告..." disabled={isCopilotTyping} className="w-full bg-indigo-50 border-transparent rounded-xl pl-4 pr-12 py-3.5 text-sm focus:outline-none focus:bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/20 transition-all disabled:opacity-50"/>
-                                    <button onClick={handleCopilotSend} disabled={isCopilotTyping} className="absolute right-1.5 p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm disabled:opacity-50"><Wand2 size="{18}"/></button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                );
-            };
-
-            const renderMTDashboard = () => {
-                // 动态从大盘聊天记录里抓取“遇阻”状态，模拟真实的后端数据流
-                const isCurrentBlocked = messages.some(m => m.type === 'json' && m.text.includes('🔴遇阻'));
-                const isCurrentSmooth = messages.some(m => m.type === 'json' && m.text.includes('🟢顺利'));
-                const currentStatus = isCurrentBlocked ? 'blocked' : (isCurrentSmooth ? 'smooth' : 'learning');
-                
-                const mockFleet = [
-                    { id: '101', name: '当前访客 (你)', task: currentPersona.mode !== '带教助手' ? currentPersona.mode : '基础环境准备', status: currentStatus, progress: Math.round((tasks.filter(t=>t.completed).length / tasks.length) * 100) },
-                    { id: '102', name: '林实习', task: '沙盒环境跑批测试', status: 'smooth', progress: 42 },
-                    { id: '103', name: '张实习', task: '跨时区沟通模拟', status: 'blocked', progress: 70 },
-                    { id: '104', name: '王实习', task: '异常工单复盘', status: 'learning', progress: 85 },
-                ];
-
-                const mtEmotionProfiles = [
-                    {
-                        name: '张实习', phase: '跨时区沟通模拟', stress: 82, tags: ['高压', '沟通畏难', '进度卡壳'],
-                        aiComment: '多次修改英文邮件仍被退回，与 AI 私聊时表现出明显的挫败感。由于连续两天在此卡点，建议导师务必今晚前介入干预。',
-                        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Max',
-                        isHighRisk: true,
-                        communicationAdvice: '“我看这个北美的客户确实比较挑剔，你前两版其实抓点挺准的，咱们先别急，一起看看怎么调下语气？”',
-                        actionPlan: ['立刻响应 TA 发起的求助工单', '提供两篇团队沉淀的标准话术模板', '酌情减少其明天的清洗任务量，给与消化时间']
-                    },
-                    {
-                        name: '王实习', phase: '异常工单复盘', stress: 55, tags: ['自我怀疑', '努力', '瓶颈期'],
-                        aiComment: '能按步骤操作 5Whys，但在拆解根因时逻辑容易发散。对出错较为自责，处于典型的新人阵痛期，需要正向肯定。',
-                        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jack',
-                        isHighRisk: false,
-                        communicationAdvice: '“复盘找根因确实是个痛苦的脱皮过程，但你这两次方向是对的，只是颗粒度还可以再往下细拆一层。想不想听听我当年是怎么踩坑的？”',
-                        actionPlan: ['批注其最新提交的复盘文档，给出具体的修改批注', '在晚间小组会上，公开肯定其严谨的复盘态度']
-                    },
-                    {
-                        name: '林实习', phase: '沙盒跑批测试', stress: 25, tags: ['技术控', '进度超前', '状态极佳'],
-                        aiComment: '与 AI 对话极其高效，已自行摸索出高级正则用法。当前大屏状态为“顺利推进”，精力充沛，建议给予更难挑战。',
-                        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Lily',
-                        isHighRisk: false,
-                        communicationAdvice: '“沙盒跑批准确率直接干到 99% 了，很棒啊！觉得这块还有挑战吗？有没有兴趣试着跑一下隔壁组那批更脏的真实数据？”',
-                        actionPlan: ['下放真实脱敏业务工单', '在系统后台为其打上 High Potential (高潜) 标签']
-                    }
-                ];
-
-                return (
-                    <div className="flex-1 bg-gray-50 overflow-y-auto p-10">
-                        <div className="max-w-6xl mx-auto space-y-8">
-                            <div className="flex items-end justify-between">
-                                <div>
-                                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight flex items-center gap-3">
-                                        <Briefcase className="text-blue-600"/> 导师微观看板 (MT Console)
-                                    </h1>
-                                    <p className="mt-2 text-gray-500">全局监控你名下的实习生进度与卡点</p>
-                                </div>
-                                <div className="flex gap-4">
-                                    <div className="bg-white px-5 py-3 rounded-xl border border-gray-200 shadow-sm">
-                                        <div className="text-sm text-gray-500 font-medium mb-1">名下新人总数</div>
-                                        <div className="text-2xl font-bold text-gray-900">4 <span className="text-sm font-normal text-gray-400">人</span></div>
-                                    </div>
-                                    <div className="bg-white px-5 py-3 rounded-xl border border-gray-200 shadow-sm">
-                                        <div className="text-sm text-gray-500 font-medium mb-1">求助工单</div>
-                                        <div className="text-2xl font-bold text-red-600">{escalationTickets.filter(t=>t.status === 'pending').length} <span className="text-sm font-normal text-gray-400">待处理</span></div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {escalationTickets.filter(t => t.status === 'pending').length > 0 && (
-                                <div className="bg-red-50 border border-red-200 rounded-2xl p-6 shadow-sm">
-                                    <h2 className="text-red-800 font-bold flex items-center gap-2 mb-4">
-                                        <BellRing className="animate-bounce" size="{20}"/> 紧急工单队列
-                                    </h2>
-                                    <div className="space-y-3">
-                                        {escalationTickets.filter(t => t.status === 'pending').map(ticket => (
-                                            <div key={ticket.id} className="bg-white p-4 rounded-xl border border-red-100 flex justify-between items-start gap-4">
-                                                <div className="flex-1">
-                                                    <div className="flex items-center gap-3 mb-2">
-                                                        <span className="bg-red-100 text-red-600 text-xs font-bold px-2 py-1 rounded">#{ticket.id}</span>
-                                                        <span className="text-xs text-gray-400">{ticket.time}</span>
-                                                        <span className="text-sm font-medium text-gray-900">当前访客(你) 请求支援</span>
-                                                    </div>
-                                                    <div className="bg-gray-50 p-3 rounded-lg text-sm text-gray-600 font-mono whitespace-pre-wrap border border-gray-100">
-                                                        {ticket.context}
-                                                    </div>
-                                                </div>
-                                                <button 
-                                                    onClick={() => setEscalationTickets(prev => prev.map(t => t.id === ticket.id ? {...t, status: 'resolved'} : t))}
-                                                    className="shrink-0 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-                                                >
-                                                    标记已解决
-                                                </button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-                                <div className="px-6 py-5 border-b border-gray-200 bg-gray-50/50">
-                                    <h2 className="font-bold text-gray-900 flex items-center gap-2"><Users size="{18}"/> 实习生舰队实时状态</h2>
-                                </div>
-                                <div className="p-6">
-                                    <div className="space-y-4">
-                                        {mockFleet.map(intern => (
-                                            <div key={intern.id} className="flex items-center justify-between p-4 hover:bg-gray-50 rounded-xl border border-transparent hover:border-gray-100 transition-colors">
-                                                <div className="flex items-center gap-4 w-1/4">
-                                                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 font-bold border border-gray-200">{intern.name[0]}</div>
-                                                    <div><div className="font-medium text-gray-900">{intern.name}</div><div className="text-xs text-gray-400">ID: {intern.id}</div></div>
-                                                </div>
-                                                
-                                                <div className="w-1/3">
-                                                    <div className="flex items-center gap-2 mb-1.5"><span className="text-xs font-medium text-gray-500">总进度</span><span className="text-xs font-bold text-gray-900">{intern.progress}%</span></div>
-                                                    <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden"><div className="h-full bg-blue-500 rounded-full" style={{ width: `${intern.progress}%` }}></div></div>
-                                                </div>
-
-                                                <div className="w-1/4 px-4">
-                                                    <div className="text-xs text-gray-500 mb-1">当前聚焦</div><div className="text-sm font-medium text-gray-700 truncate">{intern.task}</div>
-                                                </div>
-
-                                                <div className="w-32 flex justify-end">
-                                                    {intern.status === 'blocked' ? <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-red-50 text-red-600 border border-red-100"><AlertTriangle size="{14}"/> 遇阻告警</span>
-                                                        : intern.status === 'smooth' ? <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-emerald-50 text-emerald-600 border border-emerald-100"><TrendingUp size="{14}"/> 推进顺利</span>
-                                                        : <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-50 text-blue-600 border border-blue-100"><Activity size="{14}"/> 正常学习</span>}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="mt-8 border-t border-gray-200 pt-8">
-                                <div className="mb-6">
-                                    <h2 className="font-bold text-gray-900 flex items-center gap-2 text-xl">
-                                        <Brain size="{22}" className="text-blue-600"/> 团队情绪雷达与 AI 辅导建议
-                                    </h2>
-                                    <p className="text-gray-500 text-sm mt-1">基于实习生与 AI 的互动行为，系统自动为你生成的 1V1 破冰话术与行动项。</p>
-                                </div>
-                                
-                                <div className="grid grid-cols-3 gap-6">
-                                    {mtEmotionProfiles.map((profile, i) => {
-                                        let theme = {};
-                                        if (profile.stress > 70) theme = { bg: 'bg-red-50', border: 'border-red-100', title: 'text-red-800', iconText: 'text-red-600', text: 'text-red-600', icon: ShieldAlert, strategyTitle: '立刻介入干预' };
-                                        else if (profile.stress > 40) theme = { bg: 'bg-amber-50', border: 'border-amber-100', title: 'text-amber-800', iconText: 'text-amber-600', text: 'text-amber-700', icon: AlertCircle, strategyTitle: '关注与点拨' };
-                                        else theme = { bg: 'bg-emerald-50', border: 'border-emerald-100', title: 'text-emerald-800', iconText: 'text-emerald-600', text: 'text-emerald-700', icon: TrendingUp, strategyTitle: '进阶挑战发放' };
-
-                                        return (
-                                        <div key={i} className={`bg-white rounded-2xl border ${profile.isHighRisk ? 'border-red-200 ring-1 ring-red-100' : 'border-gray-200'} p-5 shadow-sm flex flex-col relative`}>
-                                            {profile.isHighRisk && <div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl-lg shadow-sm">高优先</div>}
-                                            
-                                            <div className="flex items-center gap-3 mb-4">
-                                                <img src={profile.avatar} alt="avatar" className="w-10 h-10 rounded-full border border-gray-200 bg-gray-50" />
-                                                <div className="flex-1">
-                                                    <div className="flex items-center justify-between mb-1">
-                                                        <h3 className="font-bold text-gray-900">{profile.name}</h3>
-                                                        <span className={`text-xs font-bold ${profile.stress > 70 ? 'text-red-500' : profile.stress > 40 ? 'text-yellow-500' : 'text-emerald-500'}`}>压力 {profile.stress}%</span>
-                                                    </div>
-                                                    <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                                        <div className={`h-full rounded-full ${profile.stress > 70 ? 'bg-red-500' : profile.stress > 40 ? 'bg-yellow-500' : 'bg-emerald-500'}`} style={{ width: `${profile.stress}%` }}></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div className="bg-gray-50 rounded-lg p-3 border border-gray-100 mb-3 flex-1">
-                                                <div className="flex items-center gap-1.5 mb-1.5"><Bot size="{14}" className="text-gray-400"/><span className="text-[11px] font-bold text-gray-500">AI 卡点诊断</span></div>
-                                                <p className="text-xs text-gray-600 leading-relaxed">{profile.aiComment}</p>
-                                            </div>
-
-                                            <div className={`${theme.bg} rounded-xl p-3 border ${theme.border}`}>
-                                                <h4 className={`${theme.title} text-xs font-bold mb-2 flex items-center gap-1.5`}><theme.icon size={14} className={theme.iconText}/> {theme.strategyTitle}</h4>
-                                                <div className="space-y-2">
-                                                    <div>
-                                                        <span className={`text-[10px] font-bold ${theme.title} flex items-center gap-1 mb-0.5`}><MessageCircle size="{12}"/> 话术建议</span>
-                                                        <p className={`text-[11px] ${theme.text} leading-relaxed bg-white/50 p-2 rounded border ${theme.border}`}>{profile.communicationAdvice}</p>
-                                                    </div>
-                                                    <div>
-                                                        <span className={`text-[10px] font-bold ${theme.title} flex items-center gap-1 mb-0.5`}><CheckSquare size="{12}"/> 辅导动作</span>
-                                                        <ul className={`text-[11px] ${theme.text} space-y-1`}>
-                                                            {profile.actionPlan.map((item, idx) => <li key={idx} className="flex items-start gap-1"><span className={`${theme.iconText}`}>•</span> <span>{item}</span></li>)}
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                );
-            };
-
-            const renderHRDashboard = () => (
-                <div className="flex-1 bg-gray-50 overflow-y-auto p-10">
-                    <div className="max-w-6xl mx-auto space-y-8">
-                        
-                        <div className="mb-8 border-b border-gray-200 pb-6">
-                            <h1 className="text-3xl font-bold text-gray-900 tracking-tight flex items-center gap-3"><PieChart className="text-emerald-600"/> HR 战略与体验看板</h1>
-                            <p className="mt-2 text-gray-500">监控全局实习生适岗健康度，提前干预流失风险</p>
-                        </div>
-
-                        <div className="grid grid-cols-3 gap-6">
-                            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-                                <div className="flex items-center justify-between mb-4"><div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center"><CheckSquare size="{24}"/></div><span className="text-emerald-600 text-sm font-bold bg-emerald-50 px-2 py-1 rounded">+12%</span></div>
-                                <div className="text-3xl font-bold text-gray-900 mb-1">86<span className="text-lg text-gray-500 font-normal">%</span></div>
-                                <div className="text-gray-500 font-medium">大盘通关率</div>
-                            </div>
-                            
-                            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-                                <div className="flex items-center justify-between mb-4"><div className="w-12 h-12 bg-yellow-50 text-yellow-600 rounded-xl flex items-center justify-center"><HeartPulse size="{24}"/></div><span className="text-yellow-600 text-sm font-bold bg-yellow-50 px-2 py-1 rounded">AI 感知</span></div>
-                                <div className="text-3xl font-bold text-gray-900 mb-1">9.2<span className="text-lg text-gray-500 font-normal">/10</span></div>
-                                <div className="text-gray-500 font-medium">情绪健康度均值</div>
-                            </div>
-
-                            <div className="bg-white p-6 rounded-2xl border border-red-200 shadow-sm relative overflow-hidden">
-                                <div className="absolute -right-4 -top-4 w-24 h-24 bg-red-50 rounded-full"></div>
-                                <div className="flex items-center justify-between mb-4 relative z-10"><div className="w-12 h-12 bg-red-100 text-red-600 rounded-xl flex items-center justify-center"><ShieldAlert size="{24}"/></div></div>
-                                <div className="text-3xl font-bold text-gray-900 mb-1 relative z-10">2<span className="text-lg text-gray-500 font-normal"> 人</span></div>
-                                <div className="text-gray-500 font-medium relative z-10">高流失风险预警</div>
-                            </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-6 mt-8">
-                            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-                                <h3 className="font-bold text-gray-900 mb-6 flex items-center gap-2"><Activity size="{18}"/> 各阶段卡点分布</h3>
-                                <div className="space-y-5">
-                                    {[
-                                        { stage: '环境配置与安全规范', count: 5, percent: 15 },
-                                        { stage: '跨时区沟通模拟 (重点)', count: 22, percent: 65, alert: true },
-                                        { stage: 'AI 数据清洗 SOP', count: 7, percent: 20 },
-                                    ].map((item, i) => (
-                                        <div key={i}>
-                                            <div className="flex justify-between text-sm mb-2"><span className={`font-medium ${item.alert ? 'text-red-600' : 'text-gray-600'}`}>{item.stage}</span><span className="text-gray-500">{item.count} 次求助</span></div>
-                                            <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden"><div className={`h-full rounded-full ${item.alert ? 'bg-red-500' : 'bg-blue-500'}`} style={{ width: `${item.percent}%` }}></div></div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-                                <h3 className="font-bold text-gray-900 mb-6 flex items-center gap-2"><UserCheck size="{18}"/> AI 助手干预成效</h3>
-                                <div className="flex items-center justify-center py-8">
-                                    <div className="w-48 h-48 rounded-full border-8 border-gray-50 flex items-center justify-center relative shadow-inner">
-                                        <div className="absolute inset-0 rounded-full border-8 border-emerald-400" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 75%)' }}></div>
-                                        <div className="text-center">
-                                            <div className="text-4xl font-extrabold text-gray-900">78%</div>
-                                            <div className="text-xs text-gray-500 mt-1">独立解决率</div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <p className="text-center text-sm text-gray-500">本周 AI 拦截并解决了 78% 的常规业务卡点，大幅降低了 MT 介入成本。</p>
-                            </div>
-                        </div>
-
-                        <div className="mt-8 border-t border-gray-200 pt-8">
-                            <h2 className="font-bold text-gray-900 mb-6 flex items-center gap-2 text-xl"><Brain size="{22}" className="text-purple-600"/> 实习生全息情绪画像 (基于 1V1 AI 对话分析)</h2>
-                            <div className="grid grid-cols-2 gap-6">
-                                {[
-                                    { 
-                                        name: '林实习', phase: '跨时区沟通模拟', stress: 80, tags: ['内向', '技术控', '沟通抗拒'], 
-                                        aiComment: '近期与 AI 对话中多次表达对海外客户需求的困惑，存在明显畏难情绪。由于连续两天卡点，流失风险极速上升。', 
-                                        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Lily',
-                                        isHighRisk: true,
-                                        communicationAdvice: '切忌使用“为什么做不好”的施压句式。建议以“我注意到海外沟通确实是个不小的挑战，不用有压力，你想先聊聊哪里最让你头疼吗？”作为破冰开场。',
-                                        actionPlan: ['安排本周三下午与 HRBP 的非正式 1V1 (喝咖啡聊业务落差)', '建议 MT 降低其短期内全英邮件的考核比重，平滑学习曲线', '指派一位性格外向的 Senior 骨干作为临时 Buddy 进行结贴']
-                                    },
-                                    { 
-                                        name: '王实习', phase: '异常工单复盘', stress: 60, tags: ['自我怀疑', '努力', '瓶颈期'], 
-                                        aiComment: '复盘过程中触发了 3 次 AI 安抚话术，对犯错较为自责，当前处于典型的“新人信心低谷期”，需要导师在业务上给予明确的正向激励。', 
-                                        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jack',
-                                        isHighRisk: false,
-                                        communicationAdvice: '复盘找根因确实是个痛苦的脱皮过程，但你前两次抓得挺准的。这次卡壳主要是觉得维度拆解难，还是觉得颗粒度不够细？',
-                                        actionPlan: ['导师进行一次专项复盘辅导，提供优秀的 5Whys 案例库', '适当肯定其前期的努力，缓解自责情绪', '下一次产出达标时，在群内给予公开表扬']
-                                    },
-                                    { 
-                                        name: '张实习', phase: '沙盒跑批', stress: 30, tags: ['自信', '逻辑清晰', '进度超前'], 
-                                        aiComment: '与 AI 助手沟通高效，多次主动使用 prompt 解决报错，当前情绪极其稳定，学习曲线极其陡峭，具备培养成核心骨干的潜力。', 
-                                        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Max',
-                                        isHighRisk: false,
-                                        communicationAdvice: '最近跑批准确率很高啊，这周的挑战觉得轻松吗？有没有想提前看看下阶段更复杂的真实业务数据？',
-                                        actionPlan: ['邀请其在本周五的公共能量场分享一次排错心得', '下周考虑分配真实的脱敏工单，增加业务挑战', '打上 High Potential (高潜) 标签，纳入重点留用观察池']
-                                    },
-                                    { 
-                                        name: '闯关新人(当前)', phase: '基础培训', stress: 45, tags: ['探索中', '偶尔焦虑', '求知欲强'], 
-                                        aiComment: '学习态度良好，遇到卡点会主动提问，属于正常的新人适应期，当前健康度绿码。', 
-                                        avatar: ROLES[0].avatar,
-                                        isHighRisk: false,
-                                        communicationAdvice: '第一周感觉信息量大不大？环境配置都跑通了吗？有什么觉得不顺手的地方随时在群里或者私信提哦。',
-                                        actionPlan: ['观察其未来两天核心业务 SOP 的学习速度', '提醒 MT 导师点赞其首次提交的作业', '邀请参加下周的新人破冰下午茶活动']
-                                    }
-                                ].map((profile, i) => {
-                                    let theme = {};
-                                    if (profile.stress > 70) theme = { bg: 'bg-red-50', border: 'border-red-100', title: 'text-red-800', iconText: 'text-red-600', text: 'text-red-600', icon: ShieldAlert, strategyTitle: 'AI 高危干预策略' };
-                                    else if (profile.stress > 40) theme = { bg: 'bg-amber-50', border: 'border-amber-100', title: 'text-amber-800', iconText: 'text-amber-600', text: 'text-amber-700', icon: AlertCircle, strategyTitle: 'AI 瓶颈突破指导' };
-                                    else theme = { bg: 'bg-emerald-50', border: 'border-emerald-100', title: 'text-emerald-800', iconText: 'text-emerald-600', text: 'text-emerald-700', icon: TrendingUp, strategyTitle: 'AI 高潜培养与激励建议' };
-
-                                    return (
-                                    <div key={i} className={`bg-white rounded-2xl border ${profile.isHighRisk ? 'border-red-200 ring-1 ring-red-100' : 'border-gray-200'} p-6 shadow-sm flex flex-col hover:shadow-md transition-shadow relative overflow-hidden`}>
-                                        {profile.isHighRisk && <div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg shadow-sm">高流失风险预警</div>}
-                                        <div className="flex items-center justify-between mb-4">
-                                            <div className="flex items-center gap-3">
-                                                <img src={profile.avatar} alt="avatar" className="w-12 h-12 rounded-full border border-gray-200 bg-gray-50" />
-                                                <div><h3 className="font-bold text-gray-900 text-lg">{profile.name}</h3><p className="text-xs text-gray-500">当前阶段聚焦: {profile.phase}</p></div>
-                                            </div>
-                                            <div className="text-right flex flex-col items-end">
-                                                <div className={`text-sm font-bold ${profile.stress > 70 ? 'text-red-500' : profile.stress > 40 ? 'text-yellow-500' : 'text-emerald-500'}`}>当前压力值 {profile.stress}%</div>
-                                                <div className="w-20 h-1.5 bg-gray-100 rounded-full mt-1.5 overflow-hidden"><div className={`h-full rounded-full ${profile.stress > 70 ? 'bg-red-500' : profile.stress > 40 ? 'bg-yellow-500' : 'bg-emerald-500'}`} style={{ width: `${profile.stress}%` }}></div></div>
-                                            </div>
-                                        </div>
-                                        
-                                        <div className="flex gap-2 mb-4 flex-wrap">
-                                            {profile.tags.map((tag, idx) => <span key={idx} className={`border text-xs px-2.5 py-1 rounded-md font-medium ${profile.stress > 70 ? 'bg-red-50 text-red-700 border-red-100' : profile.stress > 40 ? 'bg-amber-50 text-amber-700 border-amber-100' : 'bg-emerald-50 text-emerald-700 border-emerald-100'}`}>{tag}</span>)}
-                                        </div>
-
-                                        <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 mb-2">
-                                            <div className="flex items-center gap-2 mb-2"><Bot size="{16}" className="text-gray-400"/><span className="text-xs font-bold text-gray-600">AI 行为分析报告</span></div>
-                                            <p className="text-sm text-gray-600 leading-relaxed">{profile.aiComment}</p>
-                                        </div>
-
-                                        <div className={`${theme.bg} rounded-xl p-4 border ${theme.border} mt-3 shadow-inner`}>
-                                            <h4 className={`${theme.title} text-sm font-bold mb-3 flex items-center gap-1.5`}><theme.icon size={16} className={theme.iconText}/> {theme.strategyTitle}</h4>
-                                            <div className="space-y-3">
-                                                <div className={`bg-white/60 p-3 rounded-lg border ${theme.border} opacity-90`}>
-                                                    <span className={`text-xs font-bold ${theme.title} block mb-1.5 flex items-center gap-1.5`}><MessageCircle size="{14}"/> 破冰沟通话术建议:</span>
-                                                    <p className={`text-xs ${theme.text} leading-relaxed`}>"{profile.communicationAdvice}"</p>
-                                                </div>
-                                                <div className={`bg-white/60 p-3 rounded-lg border ${theme.border} opacity-90`}>
-                                                    <span className={`text-xs font-bold ${theme.title} block mb-2 flex items-center gap-1.5`}><CheckSquare size="{14}"/> 推荐后续操作项:</span>
-                                                    <ul className={`text-xs ${theme.text} leading-relaxed space-y-1.5`}>
-                                                        {profile.actionPlan.map((item, idx) => <li key={idx} className="flex items-start gap-1.5"><span className={`${theme.iconText} mt-0.5`}>•</span> <span>{item}</span></li>)}
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                                })}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            );
-
-            return (
-                <div className="h-screen bg-gray-100 flex font-sans text-gray-800 overflow-hidden">
-                <div className="w-[88px] bg-gray-900 flex flex-col items-center py-6 shrink-0 z-20 shadow-xl border-r border-gray-800 relative">
-                    <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl flex items-center justify-center mb-10 shadow-lg shadow-orange-500/20"><Zap className="text-white" size="{26}"/></div>
-                    
-                    <nav className="flex-1 w-full flex flex-col gap-4 px-3">
-                    <button onClick={() => setActiveNav('group_chat')} className={`w-full aspect-square rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all group relative ${activeNav === 'group_chat' ? 'bg-gray-800 text-white shadow-inner' : 'text-gray-400 hover:bg-gray-800/50 hover:text-gray-200'}`} title="公共能量场">
-                        <MessageSquare size="{24}" className="{activeNav" 'group_chat' ? 'text-indigo-400' : 'group-hover:text-gray-300'}/>
-                        <span className="text-[11px] font-medium text-center leading-tight">能量场</span>
-                    </button>
-                    
-                    <div className="w-8 h-px bg-gray-800 my-2 mx-auto"></div>
-
-                    {currentUser.type === 'intern' && (
-                        <>
-                        <button onClick={() => {setActiveNav('guide'); setSelectedTaskIndex(null);}} className={`w-full aspect-square rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all group ${activeNav === 'guide' ? 'bg-gray-800 text-white shadow-inner' : 'text-gray-400 hover:bg-gray-800/50 hover:text-gray-200'}`} title="通关指南">
-                            <BookOpen size="{24}" className="{activeNav" 'guide' ? 'text-blue-400' : 'group-hover:text-gray-300'}/>
-                            <span className="text-[11px] font-medium">指南</span>
-                        </button>
-                        <button onClick={() => setActiveNav('chat')} className={`w-full aspect-square rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all relative group ${activeNav === 'chat' ? 'bg-gray-800 text-white shadow-inner' : 'text-gray-400 hover:bg-gray-800/50 hover:text-gray-200'}`} title="实战大厅">
-                            {!isFullyCleared && <Lock size="{12}" className="absolute top-2 right-2 text-gray-600"/>}
-                            <Terminal size="{24}" className="{activeNav" 'chat' ? 'text-orange-400' : 'group-hover:text-gray-300'}/>
-                            <span className="text-[11px] font-medium">实战大厅</span>
-                        </button>
-                        </>
-                    )}
-
-                    {currentUser.type === 'mt' && (
-                        <>
-                        <button onClick={() => setActiveNav('edit_guide')} className={`w-full aspect-square rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all group relative ${activeNav === 'edit_guide' ? 'bg-gray-800 text-white shadow-inner' : 'text-gray-400 hover:bg-gray-800/50 hover:text-gray-200'}`} title="SOP 编排指南">
-                            <Settings size="{24}" className="{activeNav" 'edit_guide' ? 'text-indigo-400' : 'group-hover:text-gray-300'}/>
-                            <span className="text-[11px] font-medium text-center leading-tight">编排指南</span>
-                        </button>
-                        <button onClick={() => setActiveNav('mt_dashboard')} className={`w-full aspect-square rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all group relative ${activeNav === 'mt_dashboard' ? 'bg-gray-800 text-white shadow-inner' : 'text-gray-400 hover:bg-gray-800/50 hover:text-gray-200'}`} title="MT 微观看板">
-                            {escalationTickets.filter(t=>t.status === 'pending').length > 0 && <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border border-gray-900"></span>}
-                            <LayoutDashboard size="{24}" className="{activeNav" 'mt_dashboard' ? 'text-blue-400' : 'group-hover:text-gray-300'}/>
-                            <span className="text-[11px] font-medium text-center leading-tight">微观看板</span>
-                        </button>
-                        </>
-                    )}
-
-                    {currentUser.type === 'hr' && (
-                        <button onClick={() => setActiveNav('hr_dashboard')} className={`w-full aspect-square rounded-xl flex flex-col items-center justify-center gap-1.5 transition-all group relative ${activeNav === 'hr_dashboard' ? 'bg-gray-800 text-white shadow-inner' : 'text-gray-400 hover:bg-gray-800/50 hover:text-gray-200'}`} title="HR 战略面板">
-                            <PieChart size="{24}" className="{activeNav" 'hr_dashboard' ? 'text-emerald-400' : 'group-hover:text-gray-300'}/>
-                            <span className="text-[11px] font-medium text-center leading-tight">战略面板</span>
-                        </button>
-                    )}
-                    </nav>
-
-                    <div className="relative mt-auto pt-6 border-t border-gray-800 w-full flex justify-center">
-                        <button onClick={() => setShowRoleMenu(!showRoleMenu)} className="w-12 h-12 rounded-full overflow-hidden border-2 border-transparent hover:border-blue-500 transition-all">
-                        <img src={currentUser.avatar} alt="avatar" className="w-full h-full object-cover bg-gray-800" />
-                        </button>
-
-                        {showRoleMenu && (
-                        <div className="absolute bottom-4 left-20 ml-4 w-56 bg-white rounded-2xl shadow-2xl border border-gray-200 py-2 z-50">
-                            <div className="px-4 py-2 border-b border-gray-100 mb-2"><div className="text-xs text-gray-500 font-medium">演示角色切换</div></div>
-                            {ROLES.map(role => (
-                                <button key={role.id} onClick={() => handleRoleSwitch(role)} className="w-full px-4 py-2 flex items-center gap-3 hover:bg-gray-50 transition-colors">
-                                <img src={role.avatar} alt="avatar" className="w-8 h-8 rounded-full bg-gray-100" />
-                                <span className={`text-sm font-medium ${currentUser.type === role.id ? 'text-blue-600' : 'text-gray-700'}`}>{role.name}</span>
-                                {currentUser.type === role.id && <CheckCircle size="{16}" className="ml-auto text-blue-500"/>}
-                                </button>
-                            ))}
-                        </div>
-                        )}
-                    </div>
-                </div>
-
-                <div className="flex-1 flex overflow-hidden">
-                    {activeNav === 'guide' && currentUser.type === 'intern' && selectedTaskIndex === null && renderGuideList()}
-                    {activeNav === 'guide' && currentUser.type === 'intern' && selectedTaskIndex !== null && renderTaskDetail()}
-                    {activeNav === 'chat' && currentUser.type === 'intern' && renderFullScreenChat()}
-
-                    {activeNav === 'edit_guide' && currentUser.type === 'mt' && renderEditGuide()}
-                    {activeNav === 'mt_dashboard' && currentUser.type === 'mt' && renderMTDashboard()}
-                    
-                    {activeNav === 'hr_dashboard' && currentUser.type === 'hr' && renderHRDashboard()}
-                    
-                    {activeNav === 'group_chat' && renderGroupChat()}
-
-                    {activeNav === 'guide' && currentUser.type === 'intern' && renderSidebarChat()}
-                </div>
-                
-                {!isSidebarChatOpen && activeNav === 'guide' && currentUser.type === 'intern' && (
-                    <button onClick={() => setIsSidebarChatOpen(true)} className="absolute bottom-8 right-8 bg-gray-900 text-white p-4 rounded-full shadow-2xl hover:bg-gray-800 hover:scale-105 transition-all flex items-center gap-3 z-30 group border-4 border-white">
-                        <div className={`p-1.5 rounded-full ${currentPersona.color.split(' ')[0]} ${currentPersona.color.split(' ')[1]} bg-opacity-20`}><Bot size="{24}"/></div>
-                        <span className="font-medium pr-2 max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 whitespace-nowrap">唤醒{currentPersona.mode}</span>
-                    </button>
-                )}
-                </div>
-            );
-        }
-
-        // 手动挂载 React 应用
-        const root = createRoot(document.getElementById('root'));
-        root.render(<App/>);
-    </script>
-</body>
-</html>            { day: 1, title: '环境配置与安全规范', desc: '完成内部 VPN、开发库及数据脱敏工具库的配置。', progress: 100, completed: true, 
               content: '### SOP 目标与验收标准\n在本模块中，你需要掌握以下核心技能：\n- 严格遵守数据合规红线，绝不在公网暴露真实客户身份。\n- 理解清洗工具的逻辑，保障本地开发环境隔离。\n\n### VPN 与网络配置\n[CODE] // 内部代理配置参数\nexport https_proxy=http://internal-proxy.company.com:8080\nexport no_proxy="localhost,127.0.0.1,.company.com"\n\n[WARN] 严禁在非公司设备上克隆包含真实用户数据的代码仓库！' },
             { day: 2, title: 'AI 数据清洗 SOP 学习', desc: '学习如何使用正则规则清洗敏感字段，遵守合规红线。', progress: 0, completed: false,
               content: '### SOP 目标与验收标准\n理解如何剔除训练语料中的 PII (个人身份信息) 数据。\n\n### 脱敏规则引擎配置范例\n[CODE] const MASKING_RULES = [\n  { pattern: /\\b1[3-9]\\d{9}\\b/g, replacement: "PHONE_HIDDEN" },\n  { pattern: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}/g, replacement: "EMAIL_HIDDEN" },\n  { pattern: /\\b\\d{17}[\\dXx]\\b/g, replacement: "ID_CARD_HIDDEN" }\n];\n\n[WARN] 如果遇到上述正则无法覆盖的特殊格式（如海外电话号码或小语种地址），请立即停止处理，并在右侧唤起带教助手进行咨询。' },
@@ -1801,30 +697,340 @@
             };
 
             const renderMTDashboard = () => {
+                // 动态从大盘聊天记录里抓取“遇阻”状态，模拟真实的后端数据流
+                const isCurrentBlocked = messages.some(m => m.type === 'json' && m.text.includes('🔴遇阻'));
+                const isCurrentSmooth = messages.some(m => m.type === 'json' && m.text.includes('🟢顺利'));
+                const currentStatus = isCurrentBlocked ? 'blocked' : (isCurrentSmooth ? 'smooth' : 'learning');
+                
+                const mockFleet = [
+                    { id: '101', name: '当前访客 (你)', task: currentPersona.mode !== '带教助手' ? currentPersona.mode : '基础环境准备', status: currentStatus, progress: Math.round((tasks.filter(t=>t.completed).length / tasks.length) * 100) },
+                    { id: '102', name: '林实习', task: '沙盒环境跑批测试', status: 'smooth', progress: 42 },
+                    { id: '103', name: '张实习', task: '跨时区沟通模拟', status: 'blocked', progress: 70 },
+                    { id: '104', name: '王实习', task: '异常工单复盘', status: 'learning', progress: 85 },
+                ];
+
+                const mtEmotionProfiles = [
+                    {
+                        name: '张实习', phase: '跨时区沟通模拟', stress: 82, tags: ['高压', '沟通畏难', '进度卡壳'],
+                        aiComment: '多次修改英文邮件仍被退回，与 AI 私聊时表现出明显的挫败感。由于连续两天在此卡点，建议导师务必今晚前介入干预。',
+                        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Max',
+                        isHighRisk: true,
+                        communicationAdvice: '“我看这个北美的客户确实比较挑剔，你前两版其实抓点挺准的，咱们先别急，一起看看怎么调下语气？”',
+                        actionPlan: ['立刻响应 TA 发起的求助工单', '提供两篇团队沉淀的标准话术模板', '酌情减少其明天的清洗任务量，给与消化时间']
+                    },
+                    {
+                        name: '王实习', phase: '异常工单复盘', stress: 55, tags: ['自我怀疑', '努力', '瓶颈期'],
+                        aiComment: '能按步骤操作 5Whys，但在拆解根因时逻辑容易发散。对出错较为自责，处于典型的新人阵痛期，需要正向肯定。',
+                        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jack',
+                        isHighRisk: false,
+                        communicationAdvice: '“复盘找根因确实是个痛苦的脱皮过程，但你这两次方向是对的，只是颗粒度还可以再往下细拆一层。想不想听听我当年是怎么踩坑的？”',
+                        actionPlan: ['批注其最新提交的复盘文档，给出具体的修改批注', '在晚间小组会上，公开肯定其严谨的复盘态度']
+                    },
+                    {
+                        name: '林实习', phase: '沙盒跑批测试', stress: 25, tags: ['技术控', '进度超前', '状态极佳'],
+                        aiComment: '与 AI 对话极其高效，已自行摸索出高级正则用法。当前大屏状态为“顺利推进”，精力充沛，建议给予更难挑战。',
+                        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Lily',
+                        isHighRisk: false,
+                        communicationAdvice: '“沙盒跑批准确率直接干到 99% 了，很棒啊！觉得这块还有挑战吗？有没有兴趣试着跑一下隔壁组那批更脏的真实数据？”',
+                        actionPlan: ['下放真实脱敏业务工单', '在系统后台为其打上 High Potential (高潜) 标签']
+                    }
+                ];
+
                 return (
-                <div className="flex-1 bg-gray-50 overflow-y-auto p-10">
-                    <div className="max-w-6xl mx-auto space-y-8">
-                    <div className="flex items-end justify-between">
-                        <div>
-                        <h1 className="text-3xl font-bold text-gray-900 tracking-tight flex items-center gap-3">
-                            <Briefcase className="text-blue-600" /> 导师微观看板 (MT Console)
-                        </h1>
-                        <p className="mt-2 text-gray-500">全局监控你名下的实习生进度与卡点 (简化版)</p>
+                    <div className="flex-1 bg-gray-50 overflow-y-auto p-10">
+                        <div className="max-w-6xl mx-auto space-y-8">
+                            <div className="flex items-end justify-between">
+                                <div>
+                                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight flex items-center gap-3">
+                                        <Briefcase className="text-blue-600" /> 导师微观看板 (MT Console)
+                                    </h1>
+                                    <p className="mt-2 text-gray-500">全局监控你名下的实习生进度与卡点</p>
+                                </div>
+                                <div className="flex gap-4">
+                                    <div className="bg-white px-5 py-3 rounded-xl border border-gray-200 shadow-sm">
+                                        <div className="text-sm text-gray-500 font-medium mb-1">名下新人总数</div>
+                                        <div className="text-2xl font-bold text-gray-900">4 <span className="text-sm font-normal text-gray-400">人</span></div>
+                                    </div>
+                                    <div className="bg-white px-5 py-3 rounded-xl border border-gray-200 shadow-sm">
+                                        <div className="text-sm text-gray-500 font-medium mb-1">求助工单</div>
+                                        <div className="text-2xl font-bold text-red-600">{escalationTickets.filter(t=>t.status === 'pending').length} <span className="text-sm font-normal text-gray-400">待处理</span></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {escalationTickets.filter(t => t.status === 'pending').length > 0 && (
+                                <div className="bg-red-50 border border-red-200 rounded-2xl p-6 shadow-sm">
+                                    <h2 className="text-red-800 font-bold flex items-center gap-2 mb-4">
+                                        <BellRing className="animate-bounce" size={20} /> 紧急工单队列
+                                    </h2>
+                                    <div className="space-y-3">
+                                        {escalationTickets.filter(t => t.status === 'pending').map(ticket => (
+                                            <div key={ticket.id} className="bg-white p-4 rounded-xl border border-red-100 flex justify-between items-start gap-4">
+                                                <div className="flex-1">
+                                                    <div className="flex items-center gap-3 mb-2">
+                                                        <span className="bg-red-100 text-red-600 text-xs font-bold px-2 py-1 rounded">#{ticket.id}</span>
+                                                        <span className="text-xs text-gray-400">{ticket.time}</span>
+                                                        <span className="text-sm font-medium text-gray-900">当前访客(你) 请求支援</span>
+                                                    </div>
+                                                    <div className="bg-gray-50 p-3 rounded-lg text-sm text-gray-600 font-mono whitespace-pre-wrap border border-gray-100">
+                                                        {ticket.context}
+                                                    </div>
+                                                </div>
+                                                <button 
+                                                    onClick={() => setEscalationTickets(prev => prev.map(t => t.id === ticket.id ? {...t, status: 'resolved'} : t))}
+                                                    className="shrink-0 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                                                >
+                                                    标记已解决
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+                                <div className="px-6 py-5 border-b border-gray-200 bg-gray-50/50">
+                                    <h2 className="font-bold text-gray-900 flex items-center gap-2"><Users size={18} /> 实习生舰队实时状态</h2>
+                                </div>
+                                <div className="p-6">
+                                    <div className="space-y-4">
+                                        {mockFleet.map(intern => (
+                                            <div key={intern.id} className="flex items-center justify-between p-4 hover:bg-gray-50 rounded-xl border border-transparent hover:border-gray-100 transition-colors">
+                                                <div className="flex items-center gap-4 w-1/4">
+                                                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 font-bold border border-gray-200">{intern.name[0]}</div>
+                                                    <div><div className="font-medium text-gray-900">{intern.name}</div><div className="text-xs text-gray-400">ID: {intern.id}</div></div>
+                                                </div>
+                                                
+                                                <div className="w-1/3">
+                                                    <div className="flex items-center gap-2 mb-1.5"><span className="text-xs font-medium text-gray-500">总进度</span><span className="text-xs font-bold text-gray-900">{intern.progress}%</span></div>
+                                                    <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden"><div className="h-full bg-blue-500 rounded-full" style={{ width: `${intern.progress}%` }}></div></div>
+                                                </div>
+
+                                                <div className="w-1/4 px-4">
+                                                    <div className="text-xs text-gray-500 mb-1">当前聚焦</div><div className="text-sm font-medium text-gray-700 truncate">{intern.task}</div>
+                                                </div>
+
+                                                <div className="w-32 flex justify-end">
+                                                    {intern.status === 'blocked' ? <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-red-50 text-red-600 border border-red-100"><AlertTriangle size={14} /> 遇阻告警</span>
+                                                        : intern.status === 'smooth' ? <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-emerald-50 text-emerald-600 border border-emerald-100"><TrendingUp size={14} /> 推进顺利</span>
+                                                        : <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-50 text-blue-600 border border-blue-100"><Activity size={14} /> 正常学习</span>}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mt-8 border-t border-gray-200 pt-8">
+                                <div className="mb-6">
+                                    <h2 className="font-bold text-gray-900 flex items-center gap-2 text-xl">
+                                        <Brain size={22} className="text-blue-600" /> 团队情绪雷达与 AI 辅导建议
+                                    </h2>
+                                    <p className="text-gray-500 text-sm mt-1">基于实习生与 AI 的互动行为，系统自动为你生成的 1V1 破冰话术与行动项。</p>
+                                </div>
+                                
+                                <div className="grid grid-cols-3 gap-6">
+                                    {mtEmotionProfiles.map((profile, i) => {
+                                        let theme = {};
+                                        if (profile.stress > 70) theme = { bg: 'bg-red-50', border: 'border-red-100', title: 'text-red-800', iconText: 'text-red-600', text: 'text-red-600', icon: ShieldAlert, strategyTitle: '立刻介入干预' };
+                                        else if (profile.stress > 40) theme = { bg: 'bg-amber-50', border: 'border-amber-100', title: 'text-amber-800', iconText: 'text-amber-600', text: 'text-amber-700', icon: AlertCircle, strategyTitle: '关注与点拨' };
+                                        else theme = { bg: 'bg-emerald-50', border: 'border-emerald-100', title: 'text-emerald-800', iconText: 'text-emerald-600', text: 'text-emerald-700', icon: TrendingUp, strategyTitle: '进阶挑战发放' };
+
+                                        return (
+                                        <div key={i} className={`bg-white rounded-2xl border ${profile.isHighRisk ? 'border-red-200 ring-1 ring-red-100' : 'border-gray-200'} p-5 shadow-sm flex flex-col relative`}>
+                                            {profile.isHighRisk && <div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl-lg shadow-sm">高优先</div>}
+                                            
+                                            <div className="flex items-center gap-3 mb-4">
+                                                <img src={profile.avatar} alt="avatar" className="w-10 h-10 rounded-full border border-gray-200 bg-gray-50" />
+                                                <div className="flex-1">
+                                                    <div className="flex items-center justify-between mb-1">
+                                                        <h3 className="font-bold text-gray-900">{profile.name}</h3>
+                                                        <span className={`text-xs font-bold ${profile.stress > 70 ? 'text-red-500' : profile.stress > 40 ? 'text-yellow-500' : 'text-emerald-500'}`}>压力 {profile.stress}%</span>
+                                                    </div>
+                                                    <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                                        <div className={`h-full rounded-full ${profile.stress > 70 ? 'bg-red-500' : profile.stress > 40 ? 'bg-yellow-500' : 'bg-emerald-500'}`} style={{ width: `${profile.stress}%` }}></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="bg-gray-50 rounded-lg p-3 border border-gray-100 mb-3 flex-1">
+                                                <div className="flex items-center gap-1.5 mb-1.5"><Bot size={14} className="text-gray-400" /><span className="text-[11px] font-bold text-gray-500">AI 卡点诊断</span></div>
+                                                <p className="text-xs text-gray-600 leading-relaxed">{profile.aiComment}</p>
+                                            </div>
+
+                                            <div className={`${theme.bg} rounded-xl p-3 border ${theme.border}`}>
+                                                <h4 className={`${theme.title} text-xs font-bold mb-2 flex items-center gap-1.5`}><theme.icon size={14} className={theme.iconText}/> {theme.strategyTitle}</h4>
+                                                <div className="space-y-2">
+                                                    <div>
+                                                        <span className={`text-[10px] font-bold ${theme.title} flex items-center gap-1 mb-0.5`}><MessageCircle size={12}/> 话术建议</span>
+                                                        <p className={`text-[11px] ${theme.text} leading-relaxed bg-white/50 p-2 rounded border ${theme.border}`}>{profile.communicationAdvice}</p>
+                                                    </div>
+                                                    <div>
+                                                        <span className={`text-[10px] font-bold ${theme.title} flex items-center gap-1 mb-0.5`}><CheckSquare size={12}/> 辅导动作</span>
+                                                        <ul className={`text-[11px] ${theme.text} space-y-1`}>
+                                                            {profile.actionPlan.map((item, idx) => <li key={idx} className="flex items-start gap-1"><span className={`${theme.iconText}`}>•</span> <span>{item}</span></li>)}
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    </div>
-                </div>
                 );
             };
 
             const renderHRDashboard = () => (
                 <div className="flex-1 bg-gray-50 overflow-y-auto p-10">
-                <div className="max-w-6xl mx-auto space-y-8">
-                    <div className="mb-8 border-b border-gray-200 pb-6">
-                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight flex items-center gap-3"><PieChart className="text-emerald-600" /> HR 战略与体验看板</h1>
-                    <p className="mt-2 text-gray-500">监控全局实习生适岗健康度，提前干预流失风险 (简化版)</p>
+                    <div className="max-w-6xl mx-auto space-y-8">
+                        
+                        <div className="mb-8 border-b border-gray-200 pb-6">
+                            <h1 className="text-3xl font-bold text-gray-900 tracking-tight flex items-center gap-3"><PieChart className="text-emerald-600" /> HR 战略与体验看板</h1>
+                            <p className="mt-2 text-gray-500">监控全局实习生适岗健康度，提前干预流失风险</p>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-6">
+                            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+                                <div className="flex items-center justify-between mb-4"><div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center"><CheckSquare size={24} /></div><span className="text-emerald-600 text-sm font-bold bg-emerald-50 px-2 py-1 rounded">+12%</span></div>
+                                <div className="text-3xl font-bold text-gray-900 mb-1">86<span className="text-lg text-gray-500 font-normal">%</span></div>
+                                <div className="text-gray-500 font-medium">大盘通关率</div>
+                            </div>
+                            
+                            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+                                <div className="flex items-center justify-between mb-4"><div className="w-12 h-12 bg-yellow-50 text-yellow-600 rounded-xl flex items-center justify-center"><HeartPulse size={24} /></div><span className="text-yellow-600 text-sm font-bold bg-yellow-50 px-2 py-1 rounded">AI 感知</span></div>
+                                <div className="text-3xl font-bold text-gray-900 mb-1">9.2<span className="text-lg text-gray-500 font-normal">/10</span></div>
+                                <div className="text-gray-500 font-medium">情绪健康度均值</div>
+                            </div>
+
+                            <div className="bg-white p-6 rounded-2xl border border-red-200 shadow-sm relative overflow-hidden">
+                                <div className="absolute -right-4 -top-4 w-24 h-24 bg-red-50 rounded-full"></div>
+                                <div className="flex items-center justify-between mb-4 relative z-10"><div className="w-12 h-12 bg-red-100 text-red-600 rounded-xl flex items-center justify-center"><ShieldAlert size={24} /></div></div>
+                                <div className="text-3xl font-bold text-gray-900 mb-1 relative z-10">2<span className="text-lg text-gray-500 font-normal"> 人</span></div>
+                                <div className="text-gray-500 font-medium relative z-10">高流失风险预警</div>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-6 mt-8">
+                            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+                                <h3 className="font-bold text-gray-900 mb-6 flex items-center gap-2"><Activity size={18} /> 各阶段卡点分布</h3>
+                                <div className="space-y-5">
+                                    {[
+                                        { stage: '环境配置与安全规范', count: 5, percent: 15 },
+                                        { stage: '跨时区沟通模拟 (重点)', count: 22, percent: 65, alert: true },
+                                        { stage: 'AI 数据清洗 SOP', count: 7, percent: 20 },
+                                    ].map((item, i) => (
+                                        <div key={i}>
+                                            <div className="flex justify-between text-sm mb-2"><span className={`font-medium ${item.alert ? 'text-red-600' : 'text-gray-600'}`}>{item.stage}</span><span className="text-gray-500">{item.count} 次求助</span></div>
+                                            <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden"><div className={`h-full rounded-full ${item.alert ? 'bg-red-500' : 'bg-blue-500'}`} style={{ width: `${item.percent}%` }}></div></div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+                                <h3 className="font-bold text-gray-900 mb-6 flex items-center gap-2"><UserCheck size={18} /> AI 助手干预成效</h3>
+                                <div className="flex items-center justify-center py-8">
+                                    <div className="w-48 h-48 rounded-full border-8 border-gray-50 flex items-center justify-center relative shadow-inner">
+                                        <div className="absolute inset-0 rounded-full border-8 border-emerald-400" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 75%)' }}></div>
+                                        <div className="text-center">
+                                            <div className="text-4xl font-extrabold text-gray-900">78%</div>
+                                            <div className="text-xs text-gray-500 mt-1">独立解决率</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p className="text-center text-sm text-gray-500">本周 AI 拦截并解决了 78% 的常规业务卡点，大幅降低了 MT 介入成本。</p>
+                            </div>
+                        </div>
+
+                        <div className="mt-8 border-t border-gray-200 pt-8">
+                            <h2 className="font-bold text-gray-900 mb-6 flex items-center gap-2 text-xl"><Brain size={22} className="text-purple-600" /> 实习生全息情绪画像 (基于 1V1 AI 对话分析)</h2>
+                            <div className="grid grid-cols-2 gap-6">
+                                {[
+                                    { 
+                                        name: '林实习', phase: '跨时区沟通模拟', stress: 80, tags: ['内向', '技术控', '沟通抗拒'], 
+                                        aiComment: '近期与 AI 对话中多次表达对海外客户需求的困惑，存在明显畏难情绪。由于连续两天卡点，流失风险极速上升。', 
+                                        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Lily',
+                                        isHighRisk: true,
+                                        communicationAdvice: '切忌使用“为什么做不好”的施压句式。建议以“我注意到海外沟通确实是个不小的挑战，不用有压力，你想先聊聊哪里最让你头疼吗？”作为破冰开场。',
+                                        actionPlan: ['安排本周三下午与 HRBP 的非正式 1V1 (喝咖啡聊业务落差)', '建议 MT 降低其短期内全英邮件的考核比重，平滑学习曲线', '指派一位性格外向的 Senior 骨干作为临时 Buddy 进行结对']
+                                    },
+                                    { 
+                                        name: '王实习', phase: '异常工单复盘', stress: 60, tags: ['自我怀疑', '努力', '瓶颈期'], 
+                                        aiComment: '复盘过程中触发了 3 次 AI 安抚话术，对犯错较为自责，当前处于典型的“新人信心低谷期”，需要导师在业务上给予明确的正向激励。', 
+                                        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jack',
+                                        isHighRisk: false,
+                                        communicationAdvice: '复盘找根因确实是个痛苦的脱皮过程，但你前两次抓得挺准的。这次卡壳主要是觉得维度拆解难，还是觉得颗粒度不够细？',
+                                        actionPlan: ['导师进行一次专项复盘辅导，提供优秀的 5Whys 案例库', '适当肯定其前期的努力，缓解自责情绪', '下一次产出达标时，在群内给予公开表扬']
+                                    },
+                                    { 
+                                        name: '张实习', phase: '沙盒跑批', stress: 30, tags: ['自信', '逻辑清晰', '进度超前'], 
+                                        aiComment: '与 AI 助手沟通高效，多次主动使用 prompt 解决报错，当前情绪极其稳定，学习曲线极其陡峭，具备培养成核心骨干的潜力。', 
+                                        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Max',
+                                        isHighRisk: false,
+                                        communicationAdvice: '最近跑批准确率很高啊，这周的挑战觉得轻松吗？有没有想提前看看下阶段更复杂的真实业务数据？',
+                                        actionPlan: ['邀请其在本周五的公共能量场分享一次排错心得', '下周考虑分配真实的脱敏工单，增加业务挑战', '打上 High Potential (高潜) 标签，纳入重点留用观察池']
+                                    },
+                                    { 
+                                        name: '闯关新人(当前)', phase: '基础培训', stress: 45, tags: ['探索中', '偶尔焦虑', '求知欲强'], 
+                                        aiComment: '学习态度良好，遇到卡点会主动提问，属于正常的新人适应期，当前健康度绿码。', 
+                                        avatar: ROLES[0].avatar,
+                                        isHighRisk: false,
+                                        communicationAdvice: '第一周感觉信息量大不大？环境配置都跑通了吗？有什么觉得不顺手的地方随时在群里或者私信提哦。',
+                                        actionPlan: ['观察其未来两天核心业务 SOP 的学习速度', '提醒 MT 导师点赞其首次提交的作业', '邀请参加下周的新人破冰下午茶活动']
+                                    }
+                                ].map((profile, i) => {
+                                    let theme = {};
+                                    if (profile.stress > 70) theme = { bg: 'bg-red-50', border: 'border-red-100', title: 'text-red-800', iconText: 'text-red-600', text: 'text-red-600', icon: ShieldAlert, strategyTitle: 'AI 高危干预策略' };
+                                    else if (profile.stress > 40) theme = { bg: 'bg-amber-50', border: 'border-amber-100', title: 'text-amber-800', iconText: 'text-amber-600', text: 'text-amber-700', icon: AlertCircle, strategyTitle: 'AI 瓶颈突破指导' };
+                                    else theme = { bg: 'bg-emerald-50', border: 'border-emerald-100', title: 'text-emerald-800', iconText: 'text-emerald-600', text: 'text-emerald-700', icon: TrendingUp, strategyTitle: 'AI 高潜培养与激励建议' };
+
+                                    return (
+                                    <div key={i} className={`bg-white rounded-2xl border ${profile.isHighRisk ? 'border-red-200 ring-1 ring-red-100' : 'border-gray-200'} p-6 shadow-sm flex flex-col hover:shadow-md transition-shadow relative overflow-hidden`}>
+                                        {profile.isHighRisk && <div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg shadow-sm">高流失风险预警</div>}
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div className="flex items-center gap-3">
+                                                <img src={profile.avatar} alt="avatar" className="w-12 h-12 rounded-full border border-gray-200 bg-gray-50" />
+                                                <div><h3 className="font-bold text-gray-900 text-lg">{profile.name}</h3><p className="text-xs text-gray-500">当前阶段聚焦: {profile.phase}</p></div>
+                                            </div>
+                                            <div className="text-right flex flex-col items-end">
+                                                <div className={`text-sm font-bold ${profile.stress > 70 ? 'text-red-500' : profile.stress > 40 ? 'text-yellow-500' : 'text-emerald-500'}`}>当前压力值 {profile.stress}%</div>
+                                                <div className="w-20 h-1.5 bg-gray-100 rounded-full mt-1.5 overflow-hidden"><div className={`h-full rounded-full ${profile.stress > 70 ? 'bg-red-500' : profile.stress > 40 ? 'bg-yellow-500' : 'bg-emerald-500'}`} style={{ width: `${profile.stress}%` }}></div></div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="flex gap-2 mb-4 flex-wrap">
+                                            {profile.tags.map((tag, idx) => <span key={idx} className={`border text-xs px-2.5 py-1 rounded-md font-medium ${profile.stress > 70 ? 'bg-red-50 text-red-700 border-red-100' : profile.stress > 40 ? 'bg-amber-50 text-amber-700 border-amber-100' : 'bg-emerald-50 text-emerald-700 border-emerald-100'}`}>{tag}</span>)}
+                                        </div>
+
+                                        <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 mb-2">
+                                            <div className="flex items-center gap-2 mb-2"><Bot size={16} className="text-gray-400" /><span className="text-xs font-bold text-gray-600">AI 行为分析报告</span></div>
+                                            <p className="text-sm text-gray-600 leading-relaxed">{profile.aiComment}</p>
+                                        </div>
+
+                                        <div className={`${theme.bg} rounded-xl p-4 border ${theme.border} mt-3 shadow-inner`}>
+                                            <h4 className={`${theme.title} text-sm font-bold mb-3 flex items-center gap-1.5`}><theme.icon size={16} className={theme.iconText}/> {theme.strategyTitle}</h4>
+                                            <div className="space-y-3">
+                                                <div className={`bg-white/60 p-3 rounded-lg border ${theme.border} opacity-90`}>
+                                                    <span className={`text-xs font-bold ${theme.title} block mb-1.5 flex items-center gap-1.5`}><MessageCircle size={14}/> 破冰沟通话术建议:</span>
+                                                    <p className={`text-xs ${theme.text} leading-relaxed`}>"{profile.communicationAdvice}"</p>
+                                                </div>
+                                                <div className={`bg-white/60 p-3 rounded-lg border ${theme.border} opacity-90`}>
+                                                    <span className={`text-xs font-bold ${theme.title} block mb-2 flex items-center gap-1.5`}><CheckSquare size={14}/> 推荐后续操作项:</span>
+                                                    <ul className={`text-xs ${theme.text} leading-relaxed space-y-1.5`}>
+                                                        {profile.actionPlan.map((item, idx) => <li key={idx} className="flex items-start gap-1.5"><span className={`${theme.iconText} mt-0.5`}>•</span> <span>{item}</span></li>)}
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                                })}
+                            </div>
+                        </div>
                     </div>
-                </div>
                 </div>
             );
 
