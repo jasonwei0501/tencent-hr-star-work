@@ -75,12 +75,10 @@
                 return <p key={idx} className="mb-3 text-gray-700 leading-relaxed">{line}</p>;
             });
         };
+        // 确保函数长这样：
+const fetchGeminiResponse = async (userPrompt, systemPrompt, history = []) => {
+    const apiUrl = '/api/gemini'; // 这里直接指向后端代理，不再检查任何本地变量
 
-       const fetchGeminiResponse = async (userPrompt, systemPrompt, history = []) => {
-    // 1. 请求目标变成了 Vercel 自动生成的内部路由
-    const apiUrl = '/api/gemini';
-
-    // 2. 组装对话历史
     const contents = history.map(msg => ({
         role: msg.sender === 'user' ? 'user' : 'model',
         parts: [{ text: msg.text || '' }]
@@ -93,19 +91,15 @@
         systemInstruction: { parts: [{ text: systemPrompt }] }
     };
 
-    try {
-        // 3. 向你的代理接口发请求
-        const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        const data = await response.json();
-        return data.candidates?.[0]?.content?.parts?.[0]?.text || "抱歉，AI 大脑暂时断线，请重试。";
-    } catch (error) {
-        console.error("代理 API 请求失败:", error);
-        return "系统网络连接异常，请稍后再次发送。";
-    }
+    // 如果这里还留着 if (!apiKey) 的判断，请删掉它！
+    const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+    
+    const data = await response.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || "抱歉，AI 大脑暂时断线，请重试。";
 };
 
         function App() {
