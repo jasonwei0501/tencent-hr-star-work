@@ -15,7 +15,6 @@
         import { createRoot } from 'https://esm.sh/react-dom@18.2.0/client';
         import * as Lucide from 'https://esm.sh/lucide-react@0.292.0';
 
-        // 解构所需的图标
         const {
             Send, Bot, User, HeartPulse, Activity, CheckCircle, AlertCircle, 
             Clock, ShieldAlert, BookOpen, CheckCircle2, Circle, PlayCircle, 
@@ -33,11 +32,12 @@
             { id: 'hr', name: 'HRBP', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Mimi&backgroundColor=ffdfbf' }
         ];
 
+        // 修正了 [CODE] 块内部的物理换行为转义字符 \\n，防止 React 解析时被 .split('\n') 切断导致排版崩溃
         const INITIAL_TASKS = [
             { day: 1, title: '环境配置与安全规范', desc: '完成内部 VPN、开发库及数据脱敏工具库的配置。', progress: 100, completed: true, 
-              content: '### SOP 目标与验收标准\n在本模块中，你需要掌握以下核心技能：\n- 严格遵守数据合规红线，绝不在公网暴露真实客户身份。\n- 理解清洗工具的逻辑，保障本地开发环境隔离。\n\n### VPN 与网络配置\n[CODE] // 内部代理配置参数\nexport https_proxy=http://internal-proxy.company.com:8080\nexport no_proxy="localhost,127.0.0.1,.company.com"\n\n[WARN] 严禁在非公司设备上克隆包含真实用户数据的代码仓库！' },
+              content: '### SOP 目标与验收标准\n在本模块中，你需要掌握以下核心技能：\n- 严格遵守数据合规红线，绝不在公网暴露真实客户身份。\n- 理解清洗工具的逻辑，保障本地开发环境隔离。\n\n### VPN 与网络配置\n[CODE] // 内部代理配置参数\\nexport https_proxy=http://internal-proxy.company.com:8080\\nexport no_proxy="localhost,127.0.0.1,.company.com"\n\n[WARN] 严禁在非公司设备上克隆包含真实用户数据的代码仓库！' },
             { day: 2, title: 'AI 数据清洗 SOP 学习', desc: '学习如何使用正则规则清洗敏感字段，遵守合规红线。', progress: 0, completed: false,
-              content: '### SOP 目标与验收标准\n理解如何剔除训练语料中的 PII (个人身份信息) 数据。\n\n### 脱敏规则引擎配置范例\n[CODE] const MASKING_RULES = [\n  { pattern: /\\b1[3-9]\\d{9}\\b/g, replacement: "PHONE_HIDDEN" },\n  { pattern: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}/g, replacement: "EMAIL_HIDDEN" },\n  { pattern: /\\b\\d{17}[\\dXx]\\b/g, replacement: "ID_CARD_HIDDEN" }\n];\n\n[WARN] 如果遇到上述正则无法覆盖的特殊格式（如海外电话号码或小语种地址），请立即停止处理，并在右侧唤起带教助手进行咨询。' },
+              content: '### SOP 目标与验收标准\n理解如何剔除训练语料中的 PII (个人身份信息) 数据。\n\n### 脱敏规则引擎配置范例\n[CODE] const MASKING_RULES = [\\n  { pattern: /\\b1[3-9]\\d{9}\\b/g, replacement: "PHONE_HIDDEN" },\\n  { pattern: /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}/g, replacement: "EMAIL_HIDDEN" },\\n  { pattern: /\\b\\d{17}[\\dXx]\\b/g, replacement: "ID_CARD_HIDDEN" }\\n];\n\n[WARN] 如果遇到上述正则无法覆盖的特殊格式（如海外电话号码或小语种地址），请立即停止处理，并在右侧唤起带教助手进行咨询。' },
             { day: 3, title: '沙盒环境跑批测试', desc: '在沙盒中使用小样本数据测试清洗模型的准确率。', progress: 0, completed: false, content: '### 任务目标\n在沙盒中跑通一次全量数据脱敏流程，要求检出率达到 99% 以上。' },
             { day: 4, title: '海外品牌 Tone调 对齐', desc: '学习海外各区域市场的品牌沟通话术指南。', progress: 0, completed: false, content: '### 沟通指南\n了解北美与欧洲市场的品牌表达差异。' },
             { day: 5, title: '跨时区沟通模拟', desc: '模拟回复一份存在文化差异误解的海外客户邮件。', progress: 0, completed: false, content: '### 模拟实战\n根据上一节课的 Tone 调，完成邮件回复练习。' },
@@ -75,37 +75,34 @@
                 return <p key={idx} className="mb-3 text-gray-700 leading-relaxed">{line}</p>;
             });
         };
+
         const fetchGeminiResponse = async (userPrompt, systemPrompt, history = []) => {
-    // 1. 请求目标变成了 Vercel 自动生成的内部路由
-    const apiUrl = '/api/gemini';
+            const apiUrl = '/api/gemini';
+            const contents = history.map(msg => ({
+                role: msg.sender === 'user' ? 'user' : 'model',
+                parts: [{ text: msg.text || '' }]
+            })).filter(msg => msg.parts[0].text);
 
-    // 2. 组装对话历史
-    const contents = history.map(msg => ({
-        role: msg.sender === 'user' ? 'user' : 'model',
-        parts: [{ text: msg.text || '' }]
-    })).filter(msg => msg.parts[0].text);
+            contents.push({ role: 'user', parts: [{ text: userPrompt }] });
 
-    contents.push({ role: 'user', parts: [{ text: userPrompt }] });
+            const payload = {
+                contents,
+                systemInstruction: { parts: [{ text: systemPrompt }] }
+            };
 
-    const payload = {
-        contents,
-        systemInstruction: { parts: [{ text: systemPrompt }] }
-    };
-
-    try {
-        // 3. 向你的代理接口发请求
-        const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        const data = await response.json();
-        return data.candidates?.[0]?.content?.parts?.[0]?.text || "抱歉，AI 大脑暂时断线，请重试。";
-    } catch (error) {
-        console.error("代理 API 请求失败:", error);
-        return "系统网络连接异常，请稍后再次发送。";
-    }
-};
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+                return data.candidates?.[0]?.content?.parts?.[0]?.text || "抱歉，AI 大脑暂时断线，请重试。";
+            } catch (error) {
+                console.error("代理 API 请求失败:", error);
+                return "系统网络连接异常，请稍后再次发送。";
+            }
+        };
 
 
         function App() {
@@ -121,6 +118,14 @@
             const [inputMessage, setInputMessage] = useState('');
             const [isSidebarChatOpen, setIsSidebarChatOpen] = useState(false);
             const [isAiTyping, setIsAiTyping] = useState(false);
+
+            // 新增 React 状态：AI 测验生成
+            const [isQuizGenerating, setIsQuizGenerating] = useState(false);
+            const [quizResult, setQuizResult] = useState('');
+
+            // 新增 React 状态：HR 战略简报生成
+            const [isBriefGenerating, setIsBriefGenerating] = useState(false);
+            const [hrBriefResult, setHrBriefResult] = useState('');
             
             const [currentPersona, setCurrentPersona] = useState(PERSONA_CONFIG.default);
             const [escalationTickets, setEscalationTickets] = useState([]);
@@ -180,6 +185,8 @@
 
             const handleTaskClick = (index) => {
                 setSelectedTaskIndex(index);
+                setQuizResult(''); // 切换任务时重置测验结果
+                setIsQuizGenerating(false);
                 const taskTitle = tasks[index].title;
                 const newPersona = PERSONA_CONFIG[taskTitle] || PERSONA_CONFIG.default;
                 setCurrentPersona(newPersona);
@@ -196,6 +203,29 @@
             };
 
             const completeAllTasks = () => setTasks(tasks.map(t => ({ ...t, completed: true, progress: 100 })));
+
+            // 封装的 React AI 测验生成逻辑
+            const handleGenerateQuiz = async () => {
+                setIsQuizGenerating(true);
+                setQuizResult('');
+                const task = tasks[selectedTaskIndex];
+                const contextText = task.content; 
+                const sysPrompt = "你是一个严谨的业务培训导师。请根据我提供的 SOP 教学内容，生成【1道单项选择题】来考验新人的理解程度。请直接输出：1. 题目本身 2. A/B/C/D四个选项 3. 正确答案及详细解析。排版要清晰易读。";
+                const res = await fetchGeminiResponse(contextText, sysPrompt, []);
+                setQuizResult(res);
+                setIsQuizGenerating(false);
+            };
+
+            // 封装的 React HR 战略简报生成逻辑
+            const handleGenerateHrBrief = async () => {
+                setIsBriefGenerating(true);
+                setHrBriefResult('');
+                const dashboardData = `全局通关率: 86% (+12%), 情绪健康度均值: 9.2/10, 高流失风险预警: 2人。卡点分布: 跨时区沟通模拟占65%, AI数据清洗占20%。AI助手独立解决率78%。高危人员: 林实习(沟通抗拒, 压力80%)。`;
+                const sysPrompt = "你是高级别的 HRBP 战略总监。请根据下方提供的工作台全局数据文本（包含通关率、情绪均值、卡点分布和个体画像），生成一份专业的管理建议简报。简报必须包含：1. 【全局现状与健康度总结】 2. 【高危卡点与人员风险预警】 3. 【下一步落地的 Action Items (针对导师/HR)】。语气要求客观、专业、有执行力。";
+                const res = await fetchGeminiResponse(dashboardData, sysPrompt, []);
+                setHrBriefResult(res);
+                setIsBriefGenerating(false);
+            };
 
             const handleSendMessage = async () => {
                 if (!inputMessage.trim() || isAiTyping) return;
@@ -455,6 +485,7 @@
                 </div>
             );
 
+            // 【核心修复区】：调整了底部按钮和测验容器的嵌套关系，使用 Flex Column 防止布局错位
             const renderTaskDetail = () => {
                 const task = tasks[selectedTaskIndex];
                 return (
@@ -468,16 +499,41 @@
                     </div>
 
                     <div className="p-10 max-w-3xl mx-auto w-full pb-32">
-                    {parseContent(task.content)}
-                    
-                    <div className="mt-16 pt-8 border-t border-gray-100 flex justify-center">
-                        <button 
-                            onClick={(e) => {toggleTaskCompletion(selectedTaskIndex, e); setSelectedTaskIndex(null);}}
-                            className={`flex items-center gap-2 px-8 py-3 rounded-full font-bold text-lg transition-all ${task.completed ? 'bg-emerald-100 text-emerald-600 border border-emerald-200' : 'bg-blue-600 text-white hover:bg-blue-700 shadow-xl shadow-blue-200'}`}
-                        >
-                        <CheckCircle size={22} /> {task.completed ? '已掌握此 SOP' : '标记为已掌握'}
-                        </button>
-                    </div>
+                        {parseContent(task.content)}
+                        
+                        <div className="mt-16 pt-8 border-t border-gray-100 flex flex-col items-center gap-4">
+                            <button 
+                                onClick={(e) => {toggleTaskCompletion(selectedTaskIndex, e); setSelectedTaskIndex(null);}}
+                                className={`flex items-center gap-2 px-8 py-3 rounded-full font-bold text-lg transition-all ${task.completed ? 'bg-emerald-100 text-emerald-600 border border-emerald-200' : 'bg-blue-600 text-white hover:bg-blue-700 shadow-xl shadow-blue-200'}`}
+                            >
+                                <CheckCircle size={22} /> {task.completed ? '已掌握此 SOP' : '标记为已掌握'}
+                            </button>
+
+                            {/* React 原生渲染的 AI 测验模块，替代了 MutationObserver 注入 */}
+                            {currentUser.type === 'intern' && (
+                                <div className="w-full flex flex-col items-center mt-6 border-t border-gray-100 pt-8">
+                                    <button 
+                                        onClick={handleGenerateQuiz} 
+                                        disabled={isQuizGenerating}
+                                        className="flex items-center gap-2 text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-6 py-3 rounded-full font-bold transition-colors border border-blue-200 shadow-sm disabled:opacity-50"
+                                    >
+                                        <Sparkles size={20} /> {isQuizGenerating ? 'AI 正在出题...' : quizResult ? '✨ 重新生成题目' : '✨ 生成测验题目'}
+                                    </button>
+                                    
+                                    {isQuizGenerating && (
+                                        <div className="w-full max-w-2xl mt-6 text-center p-6 text-blue-500 font-medium animate-pulse">
+                                            正在阅读当前 SOP 指南并生成专属测验...
+                                        </div>
+                                    )}
+
+                                    {quizResult && !isQuizGenerating && (
+                                        <div className="w-full max-w-2xl mt-6 bg-white border border-blue-200 rounded-xl p-6 shadow-sm text-sm text-gray-800 leading-relaxed whitespace-pre-wrap text-left">
+                                            {quizResult}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
                 );
@@ -695,7 +751,6 @@
             };
 
             const renderMTDashboard = () => {
-                // 动态从大盘聊天记录里抓取“遇阻”状态，模拟真实的后端数据流
                 const isCurrentBlocked = messages.some(m => m.type === 'json' && m.text.includes('🔴遇阻'));
                 const isCurrentSmooth = messages.some(m => m.type === 'json' && m.text.includes('🟢顺利'));
                 const currentStatus = isCurrentBlocked ? 'blocked' : (isCurrentSmooth ? 'smooth' : 'learning');
@@ -881,6 +936,7 @@
                 );
             };
 
+            // 【核心修复区】：移除了外部原生 JS 注入，改为 React 组件内嵌的 AI HR 战略简报生成模块
             const renderHRDashboard = () => (
                 <div className="flex-1 bg-gray-50 overflow-y-auto p-10">
                     <div className="max-w-6xl mx-auto space-y-8">
@@ -889,6 +945,36 @@
                             <h1 className="text-3xl font-bold text-gray-900 tracking-tight flex items-center gap-3"><PieChart className="text-emerald-600" /> HR 战略与体验看板</h1>
                             <p className="mt-2 text-gray-500">监控全局实习生适岗健康度，提前干预流失风险</p>
                         </div>
+
+                        {/* React 原生渲染的 HR AI 战略简报助手 */}
+                        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-5 mb-6 flex justify-between items-center shadow-sm">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center text-xl"><Sparkles size={20} /></div>
+                                <div>
+                                    <h3 className="text-emerald-900 font-bold">HR AI 战略简报助手</h3>
+                                    <p className="text-sm text-emerald-700 mt-0.5">一键提取下方看板统计数据，输出全局适岗评估与管理干预建议</p>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={handleGenerateHrBrief}
+                                disabled={isBriefGenerating}
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-sm shadow-emerald-600/20 disabled:opacity-50"
+                            >
+                                {isBriefGenerating ? '正在生成深度简报...' : '一键生成分析简报'}
+                            </button>
+                        </div>
+
+                        {isBriefGenerating && (
+                            <div className="bg-white border border-emerald-200 rounded-xl p-8 mb-8 shadow-sm text-sm text-emerald-600 font-medium text-center animate-pulse">
+                                正在深度分析全局通关率、预警卡点与情绪画像雷达...
+                            </div>
+                        )}
+
+                        {hrBriefResult && !isBriefGenerating && (
+                            <div className="bg-white border border-emerald-200 rounded-xl p-8 mb-8 shadow-sm text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">
+                                {hrBriefResult}
+                            </div>
+                        )}
 
                         <div className="grid grid-cols-3 gap-6">
                             <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
@@ -1126,139 +1212,8 @@
             );
         }
 
-        // 手动挂载 React 应用
         const root = createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
 </body>
 </html>
-<script>
-        (function() {
-            // 1. 独立的 API 请求函数
-            // 原有的 fetchGeminiResponse 被封装在 React babel 模块内部，无法在外部调用
-            // 因此在这里重新定义一个原生 JS 版本的请求函数
-            async function fetchAIAssistant(prompt, systemInstruction) {
-                try {
-                    const response = await fetch('/api/gemini', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{ role: 'user', parts: [{ text: prompt }] }],
-                            systemInstruction: { parts: [{ text: systemInstruction }] }
-                        })
-                    });
-                    const data = await response.json();
-                    return data.candidates?.[0]?.content?.parts?.[0]?.text || "抱歉，AI 大脑暂时断线，请重试。";
-                } catch (error) {
-                    console.error("代理 API 请求失败:", error);
-                    return "系统网络连接异常，请稍后重试。";
-                }
-            }
-
-            // 2. 使用 MutationObserver 监听 DOM 变化，动态挂载 UI
-            const observer = new MutationObserver(() => {
-                
-                // ==========================================
-                // 功能 A：AI 随堂小测验 (针对「闯关新人」)
-                // ==========================================
-                const taskDetailContainer = document.querySelector('.p-10.max-w-3xl.mx-auto.w-full.pb-32');
-                if (taskDetailContainer && !document.getElementById('ai-quiz-container')) {
-                    const actionBtnContainer = taskDetailContainer.querySelector('.mt-16.pt-8.border-t');
-                    if (actionBtnContainer) {
-                        // 创建注入的测验模块
-                        const quizWrap = document.createElement('div');
-                        quizWrap.id = 'ai-quiz-container';
-                        quizWrap.className = 'w-full flex flex-col items-center mt-10 border-t border-gray-100 pt-8';
-                        quizWrap.innerHTML = `
-                            <button id="btn-generate-quiz" class="flex items-center gap-2 text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-6 py-3 rounded-full font-bold transition-colors border border-blue-200 shadow-sm">
-                                ✨ 生成测验题目
-                            </button>
-                            <div id="quiz-result-box" class="hidden w-full max-w-2xl mt-6 bg-white border border-blue-200 rounded-xl p-6 shadow-sm text-sm text-gray-800 leading-relaxed whitespace-pre-wrap"></div>
-                        `;
-                        
-                        // 插入到原有的“标记为已掌握”容器内
-                        actionBtnContainer.parentElement.appendChild(quizWrap);
-
-                        // 绑定事件
-                        document.getElementById('btn-generate-quiz').addEventListener('click', async (e) => {
-                            const btn = e.target;
-                            const resultBox = document.getElementById('quiz-result-box');
-                            
-                            btn.innerHTML = 'AI 正在出题...';
-                            btn.style.pointerEvents = 'none';
-                            resultBox.classList.remove('hidden');
-                            resultBox.innerHTML = '<span class="animate-pulse text-blue-500 font-medium">正在阅读当前 SOP 指南并生成专属测验...</span>';
-
-                            // 抓取当前页面已渲染的 SOP 文本内容作为出题上下文
-                            const contextText = Array.from(taskDetailContainer.children)
-                                .filter(el => !el.classList.contains('mt-16') && el.id !== 'ai-quiz-container')
-                                .map(el => el.innerText)
-                                .join('\n');
-
-                            const sysPrompt = "你是一个严谨的业务培训导师。请根据我提供的 SOP 教学内容，生成【1道单项选择题】来考验新人的理解程度。请直接输出：1. 题目本身 2. A/B/C/D四个选项 3. 正确答案及详细解析。排版要清晰易读。";
-                            const res = await fetchAIAssistant(contextText, sysPrompt);
-
-                            resultBox.innerHTML = res; // 依赖 Tailwind 的 whitespace-pre-wrap 换行
-                            btn.innerHTML = '✨ 重新生成题目';
-                            btn.style.pointerEvents = 'auto';
-                        });
-                    }
-                }
-
-                // ==========================================
-                // 功能 B：HR AI 战略简报 (针对「HRBP」)
-                // ==========================================
-                const hrDashboardHeader = document.querySelector('.mb-8.border-b.border-gray-200.pb-6');
-                if (hrDashboardHeader && hrDashboardHeader.textContent.includes('战略与体验看板') && !document.getElementById('hr-ai-banner')) {
-                    
-                    // 创建注入的绿色 Banner
-                    const banner = document.createElement('div');
-                    banner.id = 'hr-ai-banner';
-                    banner.className = 'bg-emerald-50 border border-emerald-200 rounded-xl p-5 mt-6 mb-6 flex justify-between items-center shadow-sm';
-                    banner.innerHTML = `
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center text-xl">✨</div>
-                            <div>
-                                <h3 class="text-emerald-900 font-bold">HR AI 战略简报助手</h3>
-                                <p class="text-sm text-emerald-700 mt-0.5">一键提取下方看板统计数据，输出全局适岗评估与管理干预建议</p>
-                            </div>
-                        </div>
-                        <button id="btn-hr-brief" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-sm shadow-emerald-600/20">
-                            一键生成分析简报
-                        </button>
-                    `;
-                    
-                    // 简报结果输出框
-                    const briefResultContainer = document.createElement('div');
-                    briefResultContainer.id = 'hr-brief-result';
-                    briefResultContainer.className = 'hidden bg-white border border-emerald-200 rounded-xl p-8 mb-8 shadow-sm text-sm text-gray-800 leading-relaxed whitespace-pre-wrap';
-
-                    // 插入到 Header 的下方
-                    hrDashboardHeader.parentNode.insertBefore(briefResultContainer, hrDashboardHeader.nextSibling);
-                    hrDashboardHeader.parentNode.insertBefore(banner, briefResultContainer);
-
-                    // 绑定事件
-                    document.getElementById('btn-hr-brief').addEventListener('click', async (e) => {
-                        const btn = e.target;
-                        btn.innerText = '正在生成深度简报...';
-                        btn.style.pointerEvents = 'none';
-                        briefResultContainer.classList.remove('hidden');
-                        briefResultContainer.innerHTML = '<span class="animate-pulse text-emerald-600 font-medium">正在深度分析全局通关率、预警卡点与情绪画像雷达...</span>';
-
-                        // 抓取大盘父节点的全部文本内容（AI 具有理解非结构化文本的能力）
-                        const dashboardData = hrDashboardHeader.parentNode.innerText;
-                        
-                        const sysPrompt = "你是高级别的 HRBP 战略总监。请根据下方提供的工作台全局数据文本（包含通关率、情绪均值、卡点分布和个体画像），生成一份专业的管理建议简报。简报必须包含：1. 【全局现状与健康度总结】 2. 【高危卡点与人员风险预警】 3. 【下一步落地的 Action Items (针对导师/HR)】。语气要求客观、专业、有执行力。";
-                        const res = await fetchAIAssistant(dashboardData, sysPrompt);
-
-                        briefResultContainer.innerHTML = res;
-                        btn.innerText = '重新生成分析简报';
-                        btn.style.pointerEvents = 'auto';
-                    });
-                }
-            });
-
-            // 3. 启动 DOM 观测器
-            observer.observe(document.body, { childList: true, subtree: true });
-        })();
-    </script>
