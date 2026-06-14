@@ -41,19 +41,38 @@
             { day: 3, title: '沙盒环境跑批测试', desc: '在沙盒中使用小样本数据测试清洗模型的准确率。', progress: 0, completed: false, content: '### 任务目标\n在沙盒中跑通一次全量数据脱敏流程，要求检出率达到 99% 以上。' },
             { day: 4, title: '海外品牌 Tone调 对齐', desc: '学习海外各区域市场的品牌沟通话术指南。', progress: 0, completed: false, content: '### 沟通指南\n了解北美与欧洲市场的品牌表达差异。' },
             { day: 5, title: '跨时区沟通模拟', desc: '模拟回复一份存在文化差异误解的海外客户邮件。', progress: 0, completed: false, content: '### 模拟实战\n根据上一节课的 Tone 调，完成邮件回复练习。' },
-            { day: 6, title: '异常工单复盘', desc: '复盘历史失败的 AI 交付案例，提取根因。', progress: 0, completed: false, content: '### 5Whys 分析法\n学会使用根因分析工具。' },
-            { day: 7, title: '最终实战答辩', desc: '综合运用脱敏与沟通技巧，完成一次模拟全链路交付。', progress: 0, completed: false, content: '### 终极挑战\n结合 1-6 天的内容，完成最终考核。' }
-        ];
+            { 
+            day: 6, 
+            title: '腾讯「瑞雪精神」合规红线学习', 
+            desc: '学习企微打卡、食堂排队、公车预订中的“瑞雪”高压线与行为倡导。', 
+            progress: 0, 
+            completed: false, 
+            content: '### SOP 目标与验收标准\n在腾讯，“瑞雪”代表着高标准的职业操守与阳光的公司文化。新入职的新人必须明晰“瑞雪”倡导与合规红线。\n\n### 常见瑞雪场景判罚标准\n[WARN] 严禁使用抢票脚本或代打卡工具，一经发现直接触发行为不端警报！\n[WARN] 在企微大群或内部论坛发表言论时，须保持理性客观，严禁人身攻击。' 
+        },
+        { 
+            day: 7, 
+            title: '跨部门「研产撕逼」AI 智能调解模拟', 
+            desc: '模拟产品运营与技术接口人因“需求变更/排期砍半”发生激烈冲突时的调解。', 
+            progress: 0, 
+            completed: false, 
+            content: '### 挑战背景\n研发表示“底层架构不支持，这周绝对上不了线”；产品经理坚持“这是老板亲自盯的战略级需求”。双方在企微群内疯狂拉锯，协同效率降至冰点。\n\n### AI 调解器介入逻辑\n[CODE] // AI 语义冲突分级引擎\\nif (message.includes("绝对做不了") && message.includes("老板说的")) {\\n  return "触发【产研矛盾-II级预警】，启动 AI 话术缓冲机制：【各退一步法】";\\n}\n\n[WARN] 作为业务新人，你需要学会利用 AI 助手快速重构双方的对立情绪，将“撕逼话术”转化为“对齐业务价值”的建设性表达。' 
+        }
+    ];
 
         const PERSONA_CONFIG = {
-            default: { mode: '带教助手', greeting: '嗨！我是你的新人专属带教助手~ 今天工作还顺利吗？', color: 'bg-blue-100 text-blue-700' },
-            '环境配置与安全规范': { mode: 'IT 大牛', greeting: '同学你好，我是你的 IT 支持助手。VPN 或者环境变量配置遇到报错了吗？直接把 Error Log 贴给我看看。', color: 'bg-slate-100 text-slate-700' },
-            'AI 数据清洗 SOP 学习': { mode: '质检审计员', greeting: '警告：数据合规无小事！这里是清洗监督助手，抽样数据遇到无法判断脱敏边界的字段了吗？', color: 'bg-red-100 text-red-700' },
-            '沙盒环境跑批测试': { mode: '测试工程师', greeting: '沙盒跑批助手就位！今天批次跑完没？准确率有达到 95% 吗？', color: 'bg-cyan-100 text-cyan-700' },
-            '海外品牌 Tone调 对齐': { mode: '跨文化公关顾问', greeting: 'Hello! 本地化沟通助手上线。北美客户觉得我们的回复不够 polite？把原邮件发我，我们一起来 Rewrite！', color: 'bg-purple-100 text-purple-700' },
-            '异常工单复盘': { mode: '复盘导师', greeting: '我是你的复盘导师。遇到挫折没关系，但我们要用 5Whys 分析法挖到根因。今天哪个 Case 让你头疼？', color: 'bg-amber-100 text-amber-700' },
-            graduated: { mode: '全栈业务导师', greeting: '🎉 恭喜通关所有前置培训！我是你的实战导师，现在你面临的是真正的业务。有任何数据异常或者客户难搞的点，随时找我！', color: 'bg-orange-100 text-orange-700' }
-        };
+        default: { mode: '带教助手', greeting: '嗨！我是你的新人专属带教助手~ 今天工作还顺利吗？', color: 'bg-blue-100 text-blue-700' },
+        '环境配置与安全规范': { mode: 'IT 大牛', greeting: '同学你好，我是你的 IT 支持助手。VPN 或者环境变量配置遇到报错了吗？直接把 Error Log 贴给我看看。', color: 'bg-slate-100 text-slate-700' },
+        'AI 数据清洗 SOP 学习': { mode: '质检审计员', greeting: '警告：数据合规无小事！这里是清洗监督助手，抽样数据遇到无法判断脱敏边界的字段了吗？', color: 'bg-red-100 text-red-700' },
+        '沙盒环境跑批测试': { mode: '测试工程师', greeting: '沙盒跑批助手就位！今天批次跑完没？准确率有达到 95% 吗？', color: 'bg-cyan-100 text-cyan-700' },
+        '海外品牌 Tone调 对齐': { mode: '跨文化公关顾问', greeting: 'Hello! 本地化沟通助手上线。北美客户觉得我们的回复不够 polite？把原邮件发我，我们一起来 Rewrite！', color: 'bg-purple-100 text-purple-700' },
+        '跨时区沟通模拟': { mode: '跨文化公关顾问', greeting: '准备好实战了吗？直接把你要回给客户的英文邮件发我，我帮你润色！', color: 'bg-purple-100 text-purple-700' }, // 补齐了Day 5的人设
+        
+        // 👇 这是你刚刚新增的两个重磅场景
+        '腾讯「瑞雪精神」合规红线学习': { mode: '瑞雪监督官', greeting: '同学你好，我是腾讯瑞雪文化倡导助手。听说你对内部论坛的发言尺度、或者各种灰色福利的行为边界有疑问？随时来问我，帮你稳踩红线之内！', color: 'bg-emerald-100 text-emerald-700' },
+        '跨部门「研产撕逼」AI 智能调解模拟': { mode: 'AI 产研冲突调解器', greeting: '【滴，撕逼雷达响了！】我是你的组织效能调解器。是不是研发又卡你排期了？还是产品又提奇葩需求了？把他们的聊天记录或者撕逼原话发给我，我帮你一键翻译成极其体面、让对方无法拒绝的大厂高情商话术！', color: 'bg-rose-100 text-rose-700' },
+        
+        graduated: { mode: '全栈业务导师', greeting: '🎉 恭喜通关所有前置培训！我是你的实战导师，现在你面临的是真正的业务。有任何数据异常或者客户难搞的点，随时找我！', color: 'bg-orange-100 text-orange-700' }
+    };
 
         const parseContent = (text) => {
             if (!text) return <p className="text-gray-500 italic">暂无内容，请联系导师补充。</p>;
