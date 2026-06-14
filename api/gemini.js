@@ -12,7 +12,7 @@ export default async function handler(req, res) {
   }
 
   // 目标 Google API 地址（建议使用 1.5 系列，比代码里之前的版本更稳定）
-  const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;;
 
   try {
     // 作为中间人，把前端发来的 Payload 原封不动转发给 Google
