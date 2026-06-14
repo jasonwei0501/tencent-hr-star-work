@@ -1132,3 +1132,133 @@
     </script>
 </body>
 </html>
+<script>
+        (function() {
+            // 1. 独立的 API 请求函数
+            // 原有的 fetchGeminiResponse 被封装在 React babel 模块内部，无法在外部调用
+            // 因此在这里重新定义一个原生 JS 版本的请求函数
+            async function fetchAIAssistant(prompt, systemInstruction) {
+                try {
+                    const response = await fetch('/api/gemini', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                            systemInstruction: { parts: [{ text: systemInstruction }] }
+                        })
+                    });
+                    const data = await response.json();
+                    return data.candidates?.[0]?.content?.parts?.[0]?.text || "抱歉，AI 大脑暂时断线，请重试。";
+                } catch (error) {
+                    console.error("代理 API 请求失败:", error);
+                    return "系统网络连接异常，请稍后重试。";
+                }
+            }
+
+            // 2. 使用 MutationObserver 监听 DOM 变化，动态挂载 UI
+            const observer = new MutationObserver(() => {
+                
+                // ==========================================
+                // 功能 A：AI 随堂小测验 (针对「闯关新人」)
+                // ==========================================
+                const taskDetailContainer = document.querySelector('.p-10.max-w-3xl.mx-auto.w-full.pb-32');
+                if (taskDetailContainer && !document.getElementById('ai-quiz-container')) {
+                    const actionBtnContainer = taskDetailContainer.querySelector('.mt-16.pt-8.border-t');
+                    if (actionBtnContainer) {
+                        // 创建注入的测验模块
+                        const quizWrap = document.createElement('div');
+                        quizWrap.id = 'ai-quiz-container';
+                        quizWrap.className = 'w-full flex flex-col items-center mt-10 border-t border-gray-100 pt-8';
+                        quizWrap.innerHTML = `
+                            <button id="btn-generate-quiz" class="flex items-center gap-2 text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-6 py-3 rounded-full font-bold transition-colors border border-blue-200 shadow-sm">
+                                ✨ 生成测验题目
+                            </button>
+                            <div id="quiz-result-box" class="hidden w-full max-w-2xl mt-6 bg-white border border-blue-200 rounded-xl p-6 shadow-sm text-sm text-gray-800 leading-relaxed whitespace-pre-wrap"></div>
+                        `;
+                        
+                        // 插入到原有的“标记为已掌握”容器内
+                        actionBtnContainer.parentElement.appendChild(quizWrap);
+
+                        // 绑定事件
+                        document.getElementById('btn-generate-quiz').addEventListener('click', async (e) => {
+                            const btn = e.target;
+                            const resultBox = document.getElementById('quiz-result-box');
+                            
+                            btn.innerHTML = 'AI 正在出题...';
+                            btn.style.pointerEvents = 'none';
+                            resultBox.classList.remove('hidden');
+                            resultBox.innerHTML = '<span class="animate-pulse text-blue-500 font-medium">正在阅读当前 SOP 指南并生成专属测验...</span>';
+
+                            // 抓取当前页面已渲染的 SOP 文本内容作为出题上下文
+                            const contextText = Array.from(taskDetailContainer.children)
+                                .filter(el => !el.classList.contains('mt-16') && el.id !== 'ai-quiz-container')
+                                .map(el => el.innerText)
+                                .join('\n');
+
+                            const sysPrompt = "你是一个严谨的业务培训导师。请根据我提供的 SOP 教学内容，生成【1道单项选择题】来考验新人的理解程度。请直接输出：1. 题目本身 2. A/B/C/D四个选项 3. 正确答案及详细解析。排版要清晰易读。";
+                            const res = await fetchAIAssistant(contextText, sysPrompt);
+
+                            resultBox.innerHTML = res; // 依赖 Tailwind 的 whitespace-pre-wrap 换行
+                            btn.innerHTML = '✨ 重新生成题目';
+                            btn.style.pointerEvents = 'auto';
+                        });
+                    }
+                }
+
+                // ==========================================
+                // 功能 B：HR AI 战略简报 (针对「HRBP」)
+                // ==========================================
+                const hrDashboardHeader = document.querySelector('.mb-8.border-b.border-gray-200.pb-6');
+                if (hrDashboardHeader && hrDashboardHeader.textContent.includes('战略与体验看板') && !document.getElementById('hr-ai-banner')) {
+                    
+                    // 创建注入的绿色 Banner
+                    const banner = document.createElement('div');
+                    banner.id = 'hr-ai-banner';
+                    banner.className = 'bg-emerald-50 border border-emerald-200 rounded-xl p-5 mt-6 mb-6 flex justify-between items-center shadow-sm';
+                    banner.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center text-xl">✨</div>
+                            <div>
+                                <h3 class="text-emerald-900 font-bold">HR AI 战略简报助手</h3>
+                                <p class="text-sm text-emerald-700 mt-0.5">一键提取下方看板统计数据，输出全局适岗评估与管理干预建议</p>
+                            </div>
+                        </div>
+                        <button id="btn-hr-brief" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-sm shadow-emerald-600/20">
+                            一键生成分析简报
+                        </button>
+                    `;
+                    
+                    // 简报结果输出框
+                    const briefResultContainer = document.createElement('div');
+                    briefResultContainer.id = 'hr-brief-result';
+                    briefResultContainer.className = 'hidden bg-white border border-emerald-200 rounded-xl p-8 mb-8 shadow-sm text-sm text-gray-800 leading-relaxed whitespace-pre-wrap';
+
+                    // 插入到 Header 的下方
+                    hrDashboardHeader.parentNode.insertBefore(briefResultContainer, hrDashboardHeader.nextSibling);
+                    hrDashboardHeader.parentNode.insertBefore(banner, briefResultContainer);
+
+                    // 绑定事件
+                    document.getElementById('btn-hr-brief').addEventListener('click', async (e) => {
+                        const btn = e.target;
+                        btn.innerText = '正在生成深度简报...';
+                        btn.style.pointerEvents = 'none';
+                        briefResultContainer.classList.remove('hidden');
+                        briefResultContainer.innerHTML = '<span class="animate-pulse text-emerald-600 font-medium">正在深度分析全局通关率、预警卡点与情绪画像雷达...</span>';
+
+                        // 抓取大盘父节点的全部文本内容（AI 具有理解非结构化文本的能力）
+                        const dashboardData = hrDashboardHeader.parentNode.innerText;
+                        
+                        const sysPrompt = "你是高级别的 HRBP 战略总监。请根据下方提供的工作台全局数据文本（包含通关率、情绪均值、卡点分布和个体画像），生成一份专业的管理建议简报。简报必须包含：1. 【全局现状与健康度总结】 2. 【高危卡点与人员风险预警】 3. 【下一步落地的 Action Items (针对导师/HR)】。语气要求客观、专业、有执行力。";
+                        const res = await fetchAIAssistant(dashboardData, sysPrompt);
+
+                        briefResultContainer.innerHTML = res;
+                        btn.innerText = '重新生成分析简报';
+                        btn.style.pointerEvents = 'auto';
+                    });
+                }
+            });
+
+            // 3. 启动 DOM 观测器
+            observer.observe(document.body, { childList: true, subtree: true });
+        })();
+    </script>
